@@ -1,0 +1,111 @@
+Retrieval-Augmented Generation (RAG): Architecture, Advances, and Best Practices
+
+Retrieval-Augmented Generation (RAG) is one of the most impactful techniques in practical AI deployment. It solves the fundamental limitation of LLMs — that they only know what was in their training data — by dynamically fetching relevant information at query time and providing it as context to the model.
+
+What Is RAG?
+RAG combines two components:
+1. A retriever: Searches a knowledge base (documents, database, web) to find relevant information
+2. A generator: An LLM that reads the retrieved information and produces an answer
+
+This approach enables AI systems to answer questions about private documents, real-time information, and specialized knowledge that wasn't in the model's training data — without expensive fine-tuning.
+
+Why RAG Matters
+Traditional LLMs have three major limitations:
+- Knowledge cutoff: They don't know events after their training date
+- Private data blindness: They don't have access to your company's internal documents
+- Hallucination tendency: They generate plausible-sounding but wrong answers when uncertain
+
+RAG directly addresses all three by grounding answers in retrieved source documents.
+
+The RAG Pipeline — Step by Step
+
+Step 1: Document Ingestion
+Documents (PDFs, Word files, web pages, databases) are collected and preprocessed. Text is extracted and cleaned.
+
+Step 2: Chunking
+Documents are split into smaller pieces called chunks — typically 200-1000 tokens each with overlap to preserve context across chunk boundaries. Chunking strategy significantly affects retrieval quality.
+
+Step 3: Embedding
+Each chunk is converted into a high-dimensional vector (embedding) using an embedding model. Similar meanings produce similar vectors. Common embedding models include OpenAI's text-embedding-ada-002, text-embedding-3-large, and open-source alternatives like sentence-transformers.
+
+Step 4: Vector Store Indexing
+Embeddings are stored in a vector database such as FAISS, ChromaDB, Pinecone, Weaviate, or Qdrant. These databases enable efficient similarity search across millions of vectors in milliseconds.
+
+Step 5: Query Processing
+When a user asks a question, the same embedding model converts the question into a vector.
+
+Step 6: Semantic Retrieval
+The vector database finds the top-K most semantically similar chunks using cosine similarity or dot product distance. These are the "relevant context" chunks.
+
+Step 7: Prompt Construction
+The retrieved chunks are inserted into the LLM prompt alongside the original question: "Based on the following context: [chunks], answer: [question]"
+
+Step 8: Response Generation
+The LLM generates an answer grounded in the provided context, reducing hallucinations and improving factual accuracy.
+
+Advanced RAG Techniques in 2024-2025
+
+Hybrid Search
+Combining dense retrieval (vector similarity) with sparse retrieval (BM25 keyword search) improves recall. The two methods complement each other — dense search finds semantically similar content while sparse search finds exact keyword matches.
+
+Query Rewriting and Expansion
+Before retrieval, the user's query is rewritten or expanded to improve search quality. Techniques include HyDE (Hypothetical Document Embeddings), multi-query retrieval, and step-back prompting.
+
+Re-ranking
+After initial retrieval, a cross-encoder model re-ranks the top candidates for higher precision. Models like Cohere Rerank or BGE Reranker significantly improve final answer quality.
+
+Self-RAG
+The model evaluates whether retrieval is needed for a query, checks retrieved passages for relevance, and assesses if the generated answer is grounded in the evidence — all autonomously.
+
+GraphRAG (Microsoft)
+Instead of treating documents as independent chunks, GraphRAG builds a knowledge graph from documents. This enables complex reasoning about relationships between entities across large document collections.
+
+Contextual Compression
+Instead of passing full chunks to the LLM, contextual compression filters each chunk to keep only the sentences relevant to the query, reducing noise and token usage.
+
+Agentic RAG
+Combining agents with RAG enables iterative retrieval — the agent can retrieve, evaluate, decide more information is needed, retrieve again, and synthesize across multiple retrieval steps.
+
+Evaluation Metrics for RAG
+
+RAGAS Framework
+RAGAS provides standardized metrics for RAG evaluation:
+- Faithfulness: Does the answer only contain information from the retrieved context? (Measures hallucination)
+- Answer Relevancy: Does the answer address the actual question?
+- Context Precision: What fraction of retrieved context is relevant?
+- Context Recall: What fraction of the required information was retrieved?
+
+Human Evaluation
+Automated metrics don't capture everything. Human evaluation focuses on coherence, usefulness, and accuracy in domain-specific applications.
+
+Common RAG Failure Modes
+
+Retrieval Failures
+- Semantic mismatch: The question and relevant document use different vocabulary
+- Chunking errors: Critical information split across chunk boundaries
+- Index staleness: Documents updated but index not refreshed
+
+Generation Failures
+- Context overflow: Too many chunks cause the LLM to miss key information
+- Conflicting context: Multiple retrieved chunks contradict each other
+- Hallucination despite context: LLM ignores retrieved facts and generates from memory
+
+Embedding Drift
+When embedding models are updated or changed, the vector representations shift. This causes retrieval quality degradation — old embeddings are no longer comparable to new query embeddings.
+
+RAG in Production
+
+Scaling Challenges
+Production RAG systems must handle:
+- High query volumes (thousands per second)
+- Low latency requirements (sub-second responses)
+- Large document collections (millions of chunks)
+- Concurrent index updates as documents change
+
+Cost Optimization
+Embedding costs, vector database hosting, and LLM API calls all contribute to RAG system costs. Caching frequent queries, optimizing chunk sizes, and using smaller retrieval models reduce expenses significantly.
+
+Security and Privacy
+Enterprise RAG deployments require access control — ensuring users only retrieve documents they're authorized to access. Row-level security in vector databases and metadata filtering enable this.
+
+RAG is now the dominant pattern for enterprise AI deployment. Its ability to combine the reasoning power of LLMs with up-to-date, private knowledge makes it indispensable for knowledge management, customer support, research, and decision support systems.

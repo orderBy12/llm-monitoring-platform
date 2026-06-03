@@ -36,3 +36,4 @@ nbformat>=5.9.0
 # Utilities
 tqdm>=4.66.0
 uuid
+tiktoken==0.8.0

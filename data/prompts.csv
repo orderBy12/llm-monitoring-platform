@@ -1,0 +1,106 @@
+id,prompt
+1,What are the latest trends in large language models?
+2,How does Retrieval-Augmented Generation work?
+3,What is the difference between GPT-4 and GPT-4o?
+4,Explain the concept of embedding drift in AI systems.
+5,What are AI agents and how do they work?
+6,How does FAISS work for vector similarity search?
+7,What is the EU AI Act and what does it regulate?
+8,Explain multimodal AI capabilities in 2024.
+9,What are the main challenges of deploying LLMs in production?
+10,How does chain-of-thought prompting improve reasoning?
+11,What is mixture of experts architecture in LLMs?
+12,How do small language models compare to large ones?
+13,What is Constitutional AI developed by Anthropic?
+14,Explain the RAGAS framework for evaluating RAG systems.
+15,What are the risks of AI hallucinations in enterprise applications?
+16,How does ChromaDB differ from FAISS as a vector store?
+17,What is embedding drift and why does it matter?
+18,Explain the concept of prompt versioning in LLMOps.
+19,What are the key metrics to monitor in a RAG pipeline?
+20,How does reinforcement learning from human feedback work?
+21,What is the significance of the Bletchley Declaration for AI safety?
+22,How does self-RAG improve retrieval quality?
+23,What are the differences between open source and closed source LLMs?
+24,How does GraphRAG by Microsoft work?
+25,Explain context window expansion and its impact on AI applications.
+26,What is the role of re-ranking in RAG pipelines?
+27,How do AI agents handle multi-step tasks?
+28,What is the Llama 3 model and who developed it?
+29,Explain the concept of semantic search versus keyword search.
+30,What are the main applications of multimodal AI in healthcare?
+31,How does fine-tuning differ from retrieval augmentation?
+32,What is the impact of AI on software development workflows?
+33,Explain the Direct Preference Optimization technique.
+34,What are the key components of an AI observability platform?
+35,How does token usage affect the cost of LLM APIs?
+36,What is LangChain and what does it provide for AI developers?
+37,Explain the architecture of a production RAG system.
+38,What are the main types of AI agent frameworks available in 2024?
+39,How does the EU AI Act categorize AI systems by risk?
+40,What is the difference between faithfulness and groundedness in RAG evaluation?
+41,How does hybrid search improve retrieval accuracy?
+42,What are the main challenges of AI regulation globally?
+43,Explain how cosine similarity is used in vector search.
+44,What is the role of embeddings in natural language processing?
+45,How do AI systems handle multilingual queries?
+46,What is GPT-4o and what makes it different from previous versions?
+47,Explain the concept of context compression in RAG systems.
+48,What are the main use cases for AutoGen by Microsoft?
+49,How does CrewAI enable multi-agent collaboration?
+50,What is the difference between RAG and fine-tuning for domain adaptation?
+51,Explain the concept of latency in LLM API calls.
+52,What are the main benchmarks used to evaluate LLMs?
+53,How does Gemini 1.5 Pro handle long context windows?
+54,What is the significance of open source models for AI democratization?
+55,Explain how chunking strategy affects RAG performance.
+56,What are the main safety concerns with AI agents?
+57,How does the NIST AI Risk Management Framework work?
+58,What are deepfakes and how are they detected?
+59,Explain the concept of model alignment in AI safety.
+60,How does AI interpretability research help with safety?
+61,What is mechanistic interpretability in neural networks?
+62,How do recommendation systems use AI and machine learning?
+63,What are the economic impacts of AI on employment?
+64,Explain the concept of emergent capabilities in large language models.
+65,What is in-context learning and how does LLMs use it?
+66,How do vector databases scale to millions of documents?
+67,What are the main differences between Pinecone, FAISS, and Weaviate?
+68,Explain the ReAct prompting framework for AI agents.
+69,What is HyDE and how does it improve query expansion?
+70,How does AI help in drug discovery and medical research?
+71,What are the main types of bias in AI language models?
+72,How does watermarking work for AI-generated content?
+73,Explain the concept of model distillation in machine learning.
+74,What is sparse retrieval and when is it better than dense retrieval?
+75,How do enterprises manage AI governance and compliance?
+76,What are the main components of an LLMOps platform?
+77,How does prompt engineering affect the quality of LLM outputs?
+78,Explain the role of temperature in LLM text generation.
+79,What is the difference between zero-shot and few-shot learning?
+80,How does AI assist in legal contract review and analysis?
+81,What are the main concerns about AI and data privacy?
+82,Explain the concept of retrieval augmentation versus parametric knowledge.
+83,How do AI systems detect and prevent harmful content generation?
+84,What is the impact of AI on the education sector?
+85,Explain the architecture of transformer models at a high level.
+86,What are the main differences between BERT and GPT architectures?
+87,How does AI assist in financial fraud detection?
+88,What is the role of synthetic data in AI training?
+89,Explain the concept of token limits and context overflow in LLMs?
+90,How does AI-powered code generation work?
+91,What are the main risks of deploying AI in critical infrastructure?
+92,How does multimodal AI help in autonomous vehicles?
+93,What is the significance of the o1 model series from OpenAI?
+94,Explain how LLMs are evaluated using human feedback.
+95,What are the main challenges of AI in real-time applications?
+96,How does AI help in scientific research and discovery?
+97,What is the future of AI agents in enterprise automation?
+98,Explain the concept of model quantization and its benefits.
+99,How does RAG handle conflicting information in retrieved documents?
+100,What are the latest developments in AI safety research in 2024?
+101,How do enterprises measure the ROI of AI deployments?
+102,What is the difference between narrow AI and general AI?
+103,How does AI assist in climate change research?
+104,What are the main applications of AI in cybersecurity?
+105,Explain the concept of model drift in production AI systems.

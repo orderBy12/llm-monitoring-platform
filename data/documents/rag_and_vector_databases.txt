@@ -1,0 +1,146 @@
+Retrieval-Augmented Generation (RAG) and Vector Databases
+
+INTRODUCTION
+Retrieval-Augmented Generation (RAG) has become the dominant architecture for building 
+production-ready AI applications. It solves one of the most critical limitations of LLMs: 
+the inability to access current, private, or domain-specific knowledge. RAG combines the 
+reasoning power of LLMs with the precision of information retrieval systems.
+
+WHAT IS RAG AND WHY IS IT IMPORTANT?
+LLMs are trained on data with a cutoff date and cannot access your company's internal documents, 
+real-time information, or proprietary data. RAG fixes this by:
+1. Storing your documents in a searchable vector database
+2. When a user asks a question, retrieving the most relevant documents
+3. Providing those documents as context to the LLM
+4. Having the LLM generate an answer grounded in your specific data
+
+This approach reduces hallucinations, enables real-time information access, and allows 
+organizations to build AI on top of their own knowledge bases without expensive fine-tuning.
+
+RAG PIPELINE COMPONENTS
+
+Document Ingestion
+- Load raw documents (PDFs, Word files, websites, databases)
+- Split into chunks (typically 256-1024 tokens with overlap)
+- Clean and preprocess text
+
+Embedding Generation
+- Convert text chunks into dense vector representations
+- Popular embedding models:
+  * OpenAI text-embedding-ada-002: 1536 dimensions
+  * OpenAI text-embedding-3-large: 3072 dimensions, higher accuracy
+  * sentence-transformers: open-source alternatives
+  * Cohere Embed: multilingual support
+
+Vector Storage
+- Store embeddings in a vector database for fast similarity search
+- Retrieval uses Approximate Nearest Neighbor (ANN) algorithms
+
+Retrieval
+- Convert user query to embedding
+- Find top-K most similar document chunks (cosine similarity or dot product)
+- Apply reranking for better precision
+
+Generation
+- Combine retrieved context with user query in a prompt
+- LLM generates response grounded in retrieved context
+
+VECTOR DATABASES COMPARISON
+
+FAISS (Facebook AI Similarity Search)
+- Open source, developed by Meta
+- Runs locally — no external service needed
+- Extremely fast for large-scale similarity search
+- Supports both CPU and GPU
+- Best for: local development, privacy-sensitive deployments
+- Limitation: no built-in persistence, requires manual save/load
+
+ChromaDB
+- Open source, beginner-friendly
+- Built-in persistence and metadata filtering
+- Easy Python integration
+- Best for: prototyping and small-to-medium applications
+- Can run locally or as a server
+
+Pinecone
+- Fully managed cloud vector database
+- Handles billions of vectors with automatic scaling
+- Built-in metadata filtering and namespacing
+- Best for: production enterprise deployments
+- Paid service with generous free tier
+
+Weaviate
+- Open source with cloud option
+- Supports hybrid search (vector + keyword)
+- Built-in machine learning modules
+- GraphQL interface
+
+Qdrant
+- Open source, high performance
+- Rich filtering capabilities
+- Rust-based for speed and reliability
+- Good balance of features and ease of use
+
+Milvus
+- Open source, highly scalable
+- Designed for billion-scale vector search
+- Used by Alibaba, Tencent, and other large companies
+
+ADVANCED RAG TECHNIQUES
+
+Hybrid Search
+Combining vector search with traditional keyword search (BM25) improves retrieval accuracy. 
+Useful when exact keyword matches are important alongside semantic similarity.
+
+Reranking
+After initial retrieval, a cross-encoder model reranks results for better precision. 
+Models like Cohere Rerank or BGE Reranker significantly improve retrieval quality.
+
+HyDE (Hypothetical Document Embeddings)
+Instead of embedding the query directly, the LLM generates a hypothetical answer, which is 
+then embedded. This often retrieves more relevant documents.
+
+Multi-Query Retrieval
+Generate multiple variations of the user's question and retrieve documents for each, 
+then combine results. Reduces the chance of missing relevant information.
+
+Contextual Compression
+After retrieval, extract only the most relevant sentences from each chunk rather than 
+returning the entire chunk. Reduces noise in the context provided to the LLM.
+
+Parent-Child Chunking
+Store small chunks (children) for precise retrieval but return larger chunks (parents) 
+for better context. Balances precision with completeness.
+
+RAG EVALUATION METRICS (RAGAS)
+
+Faithfulness
+Measures whether the generated answer is supported by the retrieved context.
+Score: 0-1, higher is better. Detects hallucinations.
+
+Answer Relevance
+Measures how relevant the generated answer is to the original question.
+Score: 0-1, higher is better.
+
+Context Recall
+Measures how much of the ground truth answer can be found in the retrieved context.
+Score: 0-1, higher is better.
+
+Context Precision
+Measures the fraction of retrieved chunks that are actually relevant.
+Score: 0-1, higher is better.
+
+PRODUCTION CHALLENGES
+- Embedding drift: when embedding models change, existing vectors become misaligned
+- Chunking strategy: wrong chunk sizes hurt retrieval quality significantly
+- Index updates: keeping the vector store synchronized with changing documents
+- Latency: retrieval adds additional latency to the response pipeline
+- Cost: embedding large document collections can be expensive
+
+INDUSTRY ADOPTION
+RAG is being used across industries:
+- Legal: searching case law and contracts
+- Healthcare: retrieving medical literature and patient records
+- Finance: querying financial reports and market data
+- Customer support: searching knowledge bases and documentation
+- Education: personalizing content from curriculum materials
