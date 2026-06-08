@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+
+src/__pycache__/
+
+vectorstore/
+
+venv/
+
+.env
+
+.pynb_checkpoints/
+
+logs/monitoring.db

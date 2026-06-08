@@ -12,7 +12,14 @@ import uuid
 from dotenv import load_dotenv
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from langchain_community.vectorstores import FAISS
-from langchain.schema import HumanMessage, SystemMessage
+
+try:
+    from langchain.messages import HumanMessage, SystemMessage
+except ImportError:
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+    except ImportError:
+        from langchain.schema import HumanMessage, SystemMessage
 
 load_dotenv()
 

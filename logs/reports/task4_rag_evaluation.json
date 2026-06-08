@@ -1,0 +1,10 @@
+{
+  "total_evaluated": 104,
+  "avg_context_relevance": 0.671,
+  "avg_faithfulness": 0.921,
+  "avg_groundedness": 0.818,
+  "avg_overall": 0.804,
+  "hallucination_count": 7,
+  "high_quality_count": 82,
+  "low_quality_count": 14
+}
