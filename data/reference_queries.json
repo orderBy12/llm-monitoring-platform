@@ -1,0 +1,22 @@
+[
+  "What are large language models?",
+  "How does retrieval augmented generation work?",
+  "Explain embedding vectors in natural language processing.",
+  "What is cosine similarity used for in AI?",
+  "How do transformer models process text?",
+  "What is the difference between fine-tuning and RAG?",
+  "Explain the concept of semantic search.",
+  "What are AI agents and how do they plan tasks?",
+  "How does FAISS perform similarity search?",
+  "What is the EU AI Act and who does it apply to?",
+  "Explain multimodal AI capabilities.",
+  "What is hallucination in language models?",
+  "How does prompt engineering affect model outputs?",
+  "What is the mixture of experts architecture?",
+  "Explain context windows in large language models.",
+  "What is Constitutional AI developed by Anthropic?",
+  "How does vector indexing work in production systems?",
+  "What are the main challenges of LLM deployment?",
+  "Explain the concept of token usage in LLM APIs.",
+  "What is embedding drift and why does it matter?"
+]
