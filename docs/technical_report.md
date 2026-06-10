@@ -4,6 +4,8 @@
 **Date:** June 2026
 **Stack:** Python 3.11 · Azure OpenAI · LangChain · FAISS · SQLite · Streamlit
 
+**Authors:** Aadesh Shrivastava and Shaily Pandey
+
 ---
 
 ## 1. System Architecture

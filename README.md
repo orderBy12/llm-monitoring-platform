@@ -2,6 +2,8 @@
 
 A production-oriented monitoring system for Azure OpenAI-based Retrieval-Augmented Generation (RAG) pipelines. The platform covers the full observability lifecycle: document indexing, query simulation, token and cost tracking, LLM-as-judge quality evaluation, embedding drift detection, edge case testing, and an interactive Streamlit dashboard.
 
+**Authors:** Aadesh Shrivastava and Shaily Pandey
+
 ---
 
 ## Table of Contents
