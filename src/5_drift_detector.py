@@ -30,27 +30,9 @@ import time
 import sqlite3
 import argparse
 from datetime import datetime
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_openai import AzureOpenAIEmbeddings
-
-load_dotenv()
-
-# ── Azure OpenAI ───────────────────────────────────────────────────────────────
-AZURE_ENDPOINT        = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_API_KEY         = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_API_VERSION     = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
-EMBEDDING_DEPLOYMENT  = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
-                                  "text-embedding-3-small") #text-embedding-3-small
-
-# ── Paths ──────────────────────────────────────────────────────────────────────
-DB_FILE        = "logs/monitoring.db"
-BASELINE_FILE  = "logs/drift_baseline.json" 
-REPORTS_DIR    = "logs/reports"
-REF_QUERY_FILE = "data/reference_queries.json"
-
-# ── Drift Alert Thresholds ─────────────────────────────────────────────────────
-THRESHOLD_WARNING  = 0.10   # drift_score > 0.10 → WARNING
-THRESHOLD_ANOMALY  = 0.20   # drift_score > 0.20 → ANOMALY
+import config
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -86,7 +68,7 @@ REFERENCE_QUERIES = [
 def save_reference_queries():
     """Save reference queries to disk for reproducibility."""
     os.makedirs("data", exist_ok=True)
-    with open(REF_QUERY_FILE, "w") as f:
+    with open(config.REF_QUERY_FILE, "w") as f:
         json.dump(REFERENCE_QUERIES, f, indent=2)
 
 
@@ -96,10 +78,10 @@ def save_reference_queries():
 
 def get_embedding_model():
     return AzureOpenAIEmbeddings(
-        azure_deployment = EMBEDDING_DEPLOYMENT,
-        azure_endpoint   = AZURE_ENDPOINT,
-        api_key          = AZURE_API_KEY,
-        api_version      = AZURE_API_VERSION,
+        azure_deployment = config.EMBEDDING_DEPLOYMENT,
+        azure_endpoint   = config.AZURE_ENDPOINT,
+        api_key          = config.AZURE_API_KEY,
+        api_version      = config.AZURE_API_VERSION,
     )
 
 
@@ -163,9 +145,9 @@ def drift_score(vec_current: list, vec_reference: list) -> float:
 
 def classify_drift(score: float) -> str:
     """Classify a drift score into a status label."""
-    if score < THRESHOLD_WARNING:
+    if score < config.DRIFT_WARNING_THRESHOLD :
         return "HEALTHY"
-    elif score < THRESHOLD_ANOMALY:
+    elif score < config.DRIFT_ANOMALY_THRESHOLD:
         return "WARNING"
     else:
         return "ANOMALY"
@@ -184,8 +166,8 @@ def create_baseline():
     print("  PHASE 1: Creating Drift Baseline")
     print("═" * 55)
 
-    if os.path.isfile(BASELINE_FILE):
-        print(f"\n⚠️  Baseline already exists at {BASELINE_FILE}")
+    if os.path.isfile(config.BASELINE_FILE):
+        print(f"\n Baseline already exists at {config.BASELINE_FILE}")
         ans = input("   Overwrite it? (y/n): ").strip().lower()
         if ans != "y":
             print("   Keeping existing baseline.")
@@ -198,7 +180,7 @@ def create_baseline():
     os.makedirs("logs", exist_ok=True)
     baseline = {
         "created_at":        datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-        "embedding_model":   EMBEDDING_DEPLOYMENT,
+        "embedding_model":   config.EMBEDDING_DEPLOYMENT,
         "query_count":       len(REFERENCE_QUERIES),
         "embedding_dim":     len(vectors[0]) if vectors else 0,
         "entries": [
@@ -210,13 +192,13 @@ def create_baseline():
         ]
     }
 
-    with open(BASELINE_FILE, "w") as f:
+    with open(config.BASELINE_FILE, "w") as f:
         json.dump(baseline, f)
 
     save_reference_queries()
 
-    print(f"\n✅ Baseline saved!")
-    print(f"   File     : {BASELINE_FILE}")
+    print(f"\nBaseline saved!")
+    print(f"   File     : {config.BASELINE_FILE}")
     print(f"   Queries  : {len(REFERENCE_QUERIES)}")
     print(f"   Emb dim  : {len(vectors[0])} dimensions")
     print(f"   Created  : {baseline['created_at']}")
@@ -236,11 +218,11 @@ def measure_drift():
     print("═" * 55)
 
     # ── Load baseline ──────────────────────────────────────────────────────────
-    if not os.path.isfile(BASELINE_FILE):
-        print("❌ No baseline found. Run with --mode baseline first.")
+    if not os.path.isfile(config.BASELINE_FILE):
+        print("No baseline found. Run with --mode baseline first.")
         return None
 
-    with open(BASELINE_FILE) as f:
+    with open(config.BASELINE_FILE) as f:
         baseline = json.load(f)
 
     baseline_entries = {e["query"]: e["vector"] for e in baseline["entries"]}
@@ -266,7 +248,7 @@ def measure_drift():
     for query, current_vec in zip(REFERENCE_QUERIES, current_vecs):
         ref_vec = baseline_entries.get(query)
         if ref_vec is None:
-            print(f"  ⚠️  Query not in baseline: {query[:40]}")
+            print(f"  Query not in baseline: {query[:40]}")
             continue
 
         score   = drift_score(current_vec, ref_vec)
@@ -274,7 +256,7 @@ def measure_drift():
         status  = classify_drift(score)
 
         # Status icon
-        icon = {"HEALTHY": "✅", "WARNING": "⚠️ ", "ANOMALY": "🚨"}[status]
+        icon = {"HEALTHY": "Healthy", "WARNING": "Warn", "ANOMALY": "Anomal"}[status]
 
         print(f"  {query[:48]:<48} {score:>6.4f}  {icon} {status}")
 
@@ -320,13 +302,13 @@ def measure_drift():
     _save_drift_to_db(results, summary)
 
     # ── Save JSON report ───────────────────────────────────────────────────────
-    os.makedirs(REPORTS_DIR, exist_ok=True)
-    report_path = os.path.join(REPORTS_DIR, "task5_drift_report.json")
+    os.makedirs(config.REPORTS_DIR, exist_ok=True)
+    report_path = os.path.join(config.REPORTS_DIR, "task5_drift_report.json")
     with open(report_path, "w") as f:
         json.dump(summary, f, indent=2)
 
     # ── Print summary ──────────────────────────────────────────────────────────
-    icon = {"HEALTHY": "✅", "WARNING": "⚠️ ", "ANOMALY": "🚨"}[overall_status]
+    icon = {"HEALTHY": "Healthy", "WARNING": "Warn", "ANOMALY": "Anomaly"}[overall_status]
     print(f"\n{'═' * 55}")
     print(f"  DRIFT SUMMARY  {icon}  {overall_status}")
     print(f"{'═' * 55}")
@@ -336,17 +318,17 @@ def measure_drift():
     print(f"  Healthy          : {summary['healthy_count']}")
     print(f"  Warnings         : {len(warnings)}")
     print(f"  Anomalies        : {len(anomalies)}")
-    print(f"\n  Threshold Warning : > {THRESHOLD_WARNING}")
-    print(f"  Threshold Anomaly : > {THRESHOLD_ANOMALY}")
+    print(f"\n  Threshold Warning : > {config.DRIFT_WARNING_THRESHOLD }")
+    print(f"  Threshold Anomaly : > {config.DRIFT_ANOMALY_THRESHOLD }")
 
     if anomalies:
-        print(f"\n  🚨 ANOMALY QUERIES:")
+        print(f"\n  ANOMALY QUERIES:")
         for a in anomalies:
             print(f"     drift={a['drift_score']:.4f}  {a['query'][:50]}")
 
     print(f"\n  Report: {report_path}")
     print(f"{'═' * 55}")
-    print("\n✅ Task 5 Complete!")
+    print("\nTask 5 Complete!")
 
     return summary
 
@@ -357,7 +339,7 @@ def measure_drift():
 
 def _save_drift_to_db(results: list, summary: dict):
     """Save drift measurement run to SQLite."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
 
     # Create table if it doesn't exist
     conn.execute("""
@@ -401,12 +383,12 @@ def _save_drift_to_db(results: list, summary: dict):
 
     conn.commit()
     conn.close()
-    print(f"\n  💾 Drift results saved to SQLite ({len(results)} rows)")
+    print(f"\n  Drift results saved to SQLite ({len(results)} rows)")
 
 
 def get_drift_history() -> list:
     """Return all drift measurement runs grouped by timestamp."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.row_factory = sqlite3.Row
     rows = conn.execute("""
         SELECT measured_at, overall_status,
@@ -445,7 +427,7 @@ def main():
         return
 
     # Auto mode: if no baseline exists → create it, else → measure
-    if args.mode == "baseline" or not os.path.isfile(BASELINE_FILE):
+    if args.mode == "baseline" or not os.path.isfile(config.BASELINE_FILE):
         create_baseline()
     
     if args.mode != "baseline":

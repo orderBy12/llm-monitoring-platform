@@ -25,32 +25,21 @@ import json
 import time
 import sqlite3
 from datetime import datetime
-from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 # from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.messages import HumanMessage, SystemMessage
+import config
 
-load_dotenv()
-
-# ── Paths ──────────────────────────────────────────────────────────────────────
-DB_FILE     = "logs/monitoring.db"
-REPORTS_DIR = "logs/reports"
-
-# ── Azure OpenAI ───────────────────────────────────────────────────────────────
-CHAT_DEPLOYMENT = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o")
-AZURE_ENDPOINT  = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_API_KEY   = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_VERSION   = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
 
 # ── Score thresholds (below these = poor quality) ─────────────────────────────
-THRESHOLDS = {
-    "context_relevance": 0.5,
-    "faithfulness":      0.5,
-    "groundedness":      0.5,
-}
+# THRESHOLDS = {
+#     "context_relevance": 0.5,
+#     "faithfulness":      0.5,
+#     "groundedness":      0.5,
+# }
 
-# ── How many requests to evaluate (set to None for all) ───────────────────────
-EVAL_LIMIT = None   # Evaluating every request costs tokens; 50 is a good sample
+# # ── How many requests to evaluate (set to None for all) ───────────────────────
+# EVAL_LIMIT = None   # Evaluating every request costs tokens; 50 is a good sample
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -59,12 +48,11 @@ EVAL_LIMIT = None   # Evaluating every request costs tokens; 50 is a good sample
 
 def get_llm():
     return AzureChatOpenAI(
-        azure_deployment = CHAT_DEPLOYMENT,
-        azure_endpoint   = AZURE_ENDPOINT,
-        api_key          = AZURE_API_KEY,
-        api_version      = AZURE_VERSION,
-        temperature      = 0.0,    # 0 = deterministic, important for scoring
-        max_tokens       = 300,
+        azure_deployment=config.CHAT_DEPLOYMENT,
+        azure_endpoint=config.AZURE_ENDPOINT,
+        api_key=config.AZURE_API_KEY,
+        api_version=config.AZURE_API_VERSION,
+        temperature=0.0, max_tokens=300,
     )
 
 
@@ -219,9 +207,9 @@ def evaluate_one(llm, question: str, context: str, answer: str) -> dict:
 
     # ── Quality flags (below threshold = poor quality) ─────────────────────────
     flags = []
-    if cr_score    < THRESHOLDS["context_relevance"]: flags.append("low_context_relevance")
-    if faith_score < THRESHOLDS["faithfulness"]:      flags.append("possible_hallucination")
-    if ground_score< THRESHOLDS["groundedness"]:      flags.append("low_groundedness")
+    if cr_score    < config.RAG_MIN_CONTEXT_RELEVANCE: flags.append("low_context_relevance")
+    if faith_score < config.RAG_HALLUCINATION_THRESHOLD:      flags.append("possible_hallucination")
+    if ground_score< config.RAG_MIN_GROUNDEDNESS:      flags.append("low_groundedness")
 
     return {
         "context_relevance_score":    round(cr_score,     3),
@@ -243,7 +231,7 @@ def evaluate_one(llm, question: str, context: str, answer: str) -> dict:
 
 def setup_eval_table():
     """Create the rag_evaluations table if it doesn't exist."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS rag_evaluations (
             id                        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -271,7 +259,7 @@ def setup_eval_table():
 
 def save_eval(request_id: str, user_query: str, scores: dict):
     """Save one evaluation result to SQLite."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.execute("""
         INSERT INTO rag_evaluations (
             request_id, user_query,
@@ -301,7 +289,7 @@ def save_eval(request_id: str, user_query: str, scores: dict):
 
 def get_eval_summary() -> dict:
     """Aggregate statistics across all evaluations."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.row_factory = sqlite3.Row
     row = conn.execute("""
         SELECT
@@ -336,9 +324,9 @@ def run_evaluation():
     print(" LLM judge ready\n")
 
     # ── Load logs to evaluate ──────────────────────────────────────────────────
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.row_factory = sqlite3.Row
-    limit_clause = f"LIMIT {EVAL_LIMIT}" if EVAL_LIMIT else ""
+    limit_clause = f"LIMIT {config.EVAL_LIMIT}" if config.EVAL_LIMIT else ""
     rows = conn.execute(f"""
         SELECT request_id, user_query, retrieved_context, model_response
         FROM llm_logs
@@ -371,7 +359,7 @@ def run_evaluation():
             context = str(row["retrieved_context"])
 
         # Skip if already evaluated
-        check_conn = sqlite3.connect(DB_FILE)
+        check_conn = sqlite3.connect(config.DB_FILE)
         already = check_conn.execute(
             "SELECT 1 FROM rag_evaluations WHERE request_id = ?", (request_id,)
         ).fetchone()
@@ -398,8 +386,8 @@ def run_evaluation():
 
     # ── Summary ────────────────────────────────────────────────────────────────
     summary = get_eval_summary()
-    os.makedirs(REPORTS_DIR, exist_ok=True)
-    report_path = os.path.join(REPORTS_DIR, "task4_rag_evaluation.json")
+    os.makedirs(config.REPORTS_DIR, exist_ok=True)
+    report_path = os.path.join(config.REPORTS_DIR, "task4_rag_evaluation.json")
     with open(report_path, "w") as f:
         json.dump(summary, f, indent=2)
 

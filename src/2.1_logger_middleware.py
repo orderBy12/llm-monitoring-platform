@@ -14,16 +14,8 @@ import csv
 import json
 import sqlite3
 import uuid
-import time
 from datetime import datetime
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# ── Paths ──────────────────────────────────────────────────────────────────────
-LOGS_DIR  = "logs"
-CSV_FILE  = os.path.join(LOGS_DIR, "rag_logs.csv")
-DB_FILE   = os.path.join(LOGS_DIR, "monitoring.db")
+import config
 
 # ── All 11 required fields ─────────────────────────────────────────────────────
 CSV_FIELDS = [
@@ -63,7 +55,6 @@ class LLMLogger:
     """
 
     def __init__(self):
-        os.makedirs(LOGS_DIR, exist_ok=True)
         self._setup_csv()
         self._setup_sqlite()
         print("LLMLogger initialized — logging to CSV and SQLite")
@@ -72,8 +63,8 @@ class LLMLogger:
 
     def _setup_csv(self):
         """Create CSV file with headers if it doesn't exist."""
-        file_exists = os.path.isfile(CSV_FILE)
-        self._csv_file   = open(CSV_FILE, "a", newline="", encoding="utf-8")
+        file_exists = os.path.isfile(config.CSV_LOG_FILE)
+        self._csv_file   = open(config.CSV_LOG_FILE, "a", newline="", encoding="utf-8")
         self._csv_writer = csv.DictWriter(
             self._csv_file,
             fieldnames=CSV_FIELDS,
@@ -87,7 +78,7 @@ class LLMLogger:
 
     def _setup_sqlite(self):
         """Create SQLite database and table if they don't exist."""
-        self._db_conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        self._db_conn = sqlite3.connect(config.DB_FILE, check_same_thread=False)
         self._db_conn.row_factory = sqlite3.Row   # Return rows as dict-like objects
         cursor = self._db_conn.cursor()
 

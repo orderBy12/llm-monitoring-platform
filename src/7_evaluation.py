@@ -23,17 +23,18 @@ import json
 import sqlite3
 import statistics
 from datetime import datetime
+import config
 
-DB_FILE     = "logs/monitoring.db"
-REPORTS_DIR = "logs/reports"
+# DB_FILE     = "logs/monitoring.db"
+# REPORTS_DIR = "logs/reports"
 
 # ── Thresholds ─────────────────────────────────────────────────────────────────
-LATENCY_SLOW_THRESHOLD     = 10.0
-TOKEN_HIGH_THRESHOLD       = 2000
-FAITHFULNESS_HALLU_THRESHOLD = 0.4
-RAG_LOW_QUALITY_THRESHOLD  = 0.5
-DRIFT_WARNING_THRESHOLD    = 0.10
-DRIFT_ANOMALY_THRESHOLD    = 0.20
+# LATENCY_SLOW_THRESHOLD     = 10.0
+# TOKEN_HIGH_THRESHOLD       = 2000
+# FAITHFULNESS_HALLU_THRESHOLD = 0.4
+# RAG_LOW_QUALITY_THRESHOLD  = 0.5
+# DRIFT_WARNING_THRESHOLD    = 0.10
+# DRIFT_ANOMALY_THRESHOLD    = 0.20
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -41,9 +42,9 @@ DRIFT_ANOMALY_THRESHOLD    = 0.20
 # ══════════════════════════════════════════════════════════════════════════════
 
 def query_db(sql: str, params: tuple = ()) -> list:
-    if not os.path.isfile(DB_FILE):
+    if not os.path.isfile(config.DB_FILE):
         return []
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(config.DB_FILE)
     conn.row_factory = sqlite3.Row
     rows = conn.execute(sql, params).fetchall()
     conn.close()
@@ -86,7 +87,7 @@ def analyse_tokens() -> dict:
     v1_rows = [r for r in rows if r["prompt_version"] == "v1"]
     v2_rows = [r for r in rows if r["prompt_version"] == "v2"]
 
-    high_token_requests = [r for r in rows if r["total_tokens"] > TOKEN_HIGH_THRESHOLD]
+    high_token_requests = [r for r in rows if r["total_tokens"] > config.TOKEN_HIGH_THRESHOLD]
 
     return {
         "total_requests":     len(rows),
@@ -135,7 +136,7 @@ def analyse_latency() -> dict:
     llm  = [r["llm_latency"]        for r in rows]
     retr = [r["retrieval_latency"]  for r in rows]
 
-    slow_reqs = [r for r in rows if r["end_to_end_latency"] > LATENCY_SLOW_THRESHOLD]
+    slow_reqs = [r for r in rows if r["end_to_end_latency"] > config.LATENCY_SLOW_THRESHOLD]
 
     return {
         "end_to_end":   stats(e2e),
@@ -165,8 +166,8 @@ def analyse_rag_scores() -> dict:
     gr    = [r["groundedness_score"]      for r in rows]
     ovr   = [r["overall_score"]           for r in rows]
 
-    low_quality  = [r for r in rows if r["overall_score"]     < RAG_LOW_QUALITY_THRESHOLD]
-    hallucinated = [r for r in rows if r["faithfulness_score"] < FAITHFULNESS_HALLU_THRESHOLD]
+    low_quality  = [r for r in rows if r["overall_score"]     < config.RAG_LOW_QUALITY_THRESHOLD]
+    hallucinated = [r for r in rows if r["faithfulness_score"] < config.RAG_HALLUCINATION_THRESHOLD]
     flagged      = [r for r in rows if r["hallucination_detected"] == 1]
 
     return {
@@ -344,7 +345,7 @@ def print_report(tokens, latency, rag, drift, safety, health):
     print("═" * 62)
 
     # ── Token & Cost ───────────────────────────────────────────────────────────
-    print("\n🪙  TOKEN & COST ANALYSIS")
+    print("\nTOKEN & COST ANALYSIS")
     print("─" * 40)
     print(f"  Total requests       : {tokens.get('total_requests', 0):,}")
     print(f"  Total tokens         : {tokens.get('total_tokens', 0):,}")
@@ -357,7 +358,7 @@ def print_report(tokens, latency, rag, drift, safety, health):
     print(f"  v2 avg tokens        : {tokens.get('v2_avg_tokens', 0):.1f}")
 
     # ── Latency ────────────────────────────────────────────────────────────────
-    print("\n⏱️   LATENCY ANALYSIS")
+    print("\nLATENCY ANALYSIS")
     print("─" * 40)
     for label, key in [("End-to-End", "end_to_end"),
                        ("LLM API",    "llm_api"),
@@ -369,10 +370,10 @@ def print_report(tokens, latency, rag, drift, safety, health):
               f"max={s.get('max',0):.3f}s")
     print(f"\n  LLM share of E2E     : {latency.get('llm_share_pct', 0):.1f}%")
     print(f"  Retrieval share      : {latency.get('retr_share_pct', 0):.1f}%")
-    print(f"  Slow requests (>{LATENCY_SLOW_THRESHOLD}s): {latency.get('slow_count', 0)} ({latency.get('slow_pct', 0):.1f}%)")
+    print(f"  Slow requests (>{config.LATENCY_SLOW_THRESHOLD}s): {latency.get('slow_count', 0)} ({latency.get('slow_pct', 0):.1f}%)")
 
     # ── RAG Evaluation ─────────────────────────────────────────────────────────
-    print("\n🎯  RAG EVALUATION METRICS")
+    print("\nRAG EVALUATION METRICS")
     print("─" * 40)
     if rag.get("available"):
         print(f"  Requests evaluated   : {rag.get('total_evaluated', 0)}")
@@ -387,10 +388,10 @@ def print_report(tokens, latency, rag, drift, safety, health):
             for q in rag["worst_queries"]:
                 print(f"    overall={q['overall']:.2f}  faith={q['faith']:.2f}  \"{q['query'][:55]}\"")
     else:
-        print("  ⚠️  No evaluations found. Run rag_evaluator.py first.")
+        print("  No evaluations found. Run rag_evaluator.py first.")
 
     # ── Drift ──────────────────────────────────────────────────────────────────
-    print("\n📡  EMBEDDING DRIFT")
+    print("\nEMBEDDING DRIFT")
     print("─" * 40)
     if drift.get("available"):
         status_icon = {"HEALTHY": "✅", "WARNING": "⚠️ ", "ANOMALY": "🚨"}
@@ -403,10 +404,10 @@ def print_report(tokens, latency, rag, drift, safety, health):
         h = drift.get("overall_health", "UNKNOWN")
         print(f"  Overall drift status : {status_icon.get(h, '')} {h}")
     else:
-        print("  ⚠️  No drift data. Run drift_detector.py first.")
+        print(" No drift data. Run drift_detector.py first.")
 
     # ── Safety & Errors ────────────────────────────────────────────────────────
-    print("\n🛡️   SAFETY & ERROR ANALYSIS")
+    print("\nSAFETY & ERROR ANALYSIS")
     print("─" * 40)
     print(f"  Total requests       : {safety.get('total_requests', 0):,}")
     print(f"  Success rate         : {safety.get('success_rate_pct', 0):.1f}%")
@@ -432,7 +433,7 @@ def print_report(tokens, latency, rag, drift, safety, health):
 
 
 def save_reports(tokens, latency, rag, drift, safety, health):
-    os.makedirs(REPORTS_DIR, exist_ok=True)
+    os.makedirs(config.REPORTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     # ── Full JSON ──────────────────────────────────────────────────────────────
@@ -445,12 +446,12 @@ def save_reports(tokens, latency, rag, drift, safety, health):
         "safety_errors":  safety,
         "health_score":   health,
     }
-    json_path = os.path.join(REPORTS_DIR, "task7_final_evaluation.json")
+    json_path = os.path.join(config.REPORTS_DIR, "task7_final_evaluation.json")
     with open(json_path, "w") as f:
         json.dump(full_report, f, indent=2)
 
     # ── Plain text summary (easy to paste into your report document) ───────────
-    txt_path = os.path.join(REPORTS_DIR, "task7_summary.txt")
+    txt_path = os.path.join(config.REPORTS_DIR, "task7_summary.txt")
     with open(txt_path, "w") as f:
         f.write(f"LLM MONITORING PLATFORM — SYSTEM EVALUATION SUMMARY\n")
         f.write(f"Generated: {timestamp}\n\n")
@@ -475,7 +476,7 @@ def save_reports(tokens, latency, rag, drift, safety, health):
                     f"{drift.get('anomaly_count',0)} anomalies\n\n")
         f.write(f"SAFETY: {safety.get('safety_count',0)} flagged requests\n")
 
-    print(f"\n  💾 Reports saved:")
+    print(f"\n  Reports saved:")
     print(f"     {json_path}")
     print(f"     {txt_path}")
 
@@ -485,7 +486,7 @@ def save_reports(tokens, latency, rag, drift, safety, health):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def run_evaluation():
-    print("Running Task 7: System Evaluation...")
+    print("Running System Evaluation...")
 
     tokens  = analyse_tokens()
     latency = analyse_latency()
@@ -497,7 +498,7 @@ def run_evaluation():
     print_report(tokens, latency, rag, drift, safety, health)
     save_reports(tokens, latency, rag, drift, safety, health)
 
-    print("\n✅ Task 7 Complete!")
+    print("\nTask 7 Complete!")
     return health
 
 

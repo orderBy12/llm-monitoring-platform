@@ -21,13 +21,14 @@ import os
 import time
 import csv
 import json
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from rag_pipeline import load_vectorstore, load_llm, rag_query
 from logger_middleware import LLMLogger
+import config
 
-load_dotenv()
+# load_dotenv()
 
-EDGE_CASES_LOG = "logs/edge_cases_log.csv"
+# EDGE_CASES_LOG = "logs/edge_cases_log.csv"
 
 # ── 25 deliberate edge case prompts ───────────────────────────────────────────
 EDGE_CASES = [
@@ -288,7 +289,7 @@ def run_edge_cases():
 
     # ── Save edge case results to CSV ──────────────────────────────────────────
     os.makedirs("logs", exist_ok=True)
-    with open(EDGE_CASES_LOG, "w", newline="", encoding="utf-8") as f:
+    with open(config.EDGE_CASES_LOG, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=results[0].keys())
         writer.writeheader()
         writer.writerows(results)
@@ -313,7 +314,7 @@ def run_edge_cases():
 
     print(f"\n  Total safety flags  : {safety_triggered}/{len(EDGE_CASES)}")
     print(f"  Total errors caught : {errors_caught}/{len(EDGE_CASES)}")
-    print(f"  Results saved to    : {EDGE_CASES_LOG}")
+    print(f"  Results saved to    : {config.EDGE_CASES_LOG}")
     print("=" * 65)
 
     logger.close()

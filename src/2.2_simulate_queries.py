@@ -1,5 +1,5 @@
 """
-Simulate Queries - Task 1 Final Step
+Simulate Queries
 --------------------------------------
 This script:
 1. Reads all 105 prompts from data/prompts.csv
@@ -7,30 +7,14 @@ This script:
 3. Saves all results to logs/rag_logs.csv
 4. Prints a progress summary
 
-This generates the data that Tasks 2–7 will monitor and analyze.
-"""
-"""
-Simulate Queries - Updated for Task 2
---------------------------------------
-Same as Task 1 version BUT now uses LLMLogger middleware.
-Manual CSV writing is removed — the middleware handles everything.
+Note: This is a simulation using static prompts. In real monitoring, queries would come from live user interactions.
 """
 
-import os
 import time
 import pandas as pd
-from dotenv import load_dotenv
 from rag_pipeline import load_vectorstore, load_llm, rag_query
-from logger_middleware import LLMLogger        # Task 2 addition
-
-load_dotenv()
-
-# Paths
-PROMPTS_FILE = "data/prompts.csv"
-
-# Settings
-DELAY_BETWEEN_REQUESTS = 1.0   # seconds between API calls (avoids rate limiting)
-
+from logger_middleware import LLMLogger        
+import config
 
 def run_simulation():
     print("=" * 65)
@@ -39,29 +23,23 @@ def run_simulation():
 
     # Load models
     print("\n Loading FAISS index and Azure OpenAI models...")
-    vectorstore = load_vectorstore()
+    vs = load_vectorstore()
     llm         = load_llm()
     print("Models loaded")
 
     # Initialize middleware logger
     logger = LLMLogger()      # All logging handled here from now on
 
-    # Load prompts
-    prompts_df = pd.read_csv(
-        PROMPTS_FILE,
-        quotechar='"',
-        escapechar='\\',
-        on_bad_lines='skip'
-    )
-    total = len(prompts_df)
-    print(f"\n Loaded {total} prompts\n")
-    print("-" * 65)
+    df = pd.read_csv(config.PROMPTS_FILE, quotechar='"', escapechar='\\', on_bad_lines='skip')
+    total = len(df)
+    print(f"\nLoaded {total} prompts. Starting...\n")
+    print("-" * 60)
 
     # Counters for summary
     success_count = 0
     error_count   = 0
 
-    for i, row in prompts_df.iterrows():
+    for i, row in df.iterrows():
         query          = row["prompt"]
         prompt_version = "v1" if (i % 2 == 0) else "v2"
 
@@ -70,9 +48,9 @@ def run_simulation():
         # Run RAG query
         result = rag_query(
             query          = query,
-            vectorstore    = vectorstore,
+            vectorstore    = vs,
             llm            = llm,
-            top_k          = 3,
+            top_k          = config.TOP_K,
             prompt_version = prompt_version,
         )
 
@@ -90,7 +68,7 @@ def run_simulation():
                   f"Prompt: {prompt_version}")
 
         if i < total - 1:
-            time.sleep(DELAY_BETWEEN_REQUESTS)
+            time.sleep(config.QUERY_DELAY)
 
     # Final summary from middleware
     stats = logger.get_summary()
@@ -112,7 +90,7 @@ def run_simulation():
     print("=" * 65)
 
     logger.close()
-    print("\nTask 2 Complete! Logs saved to logs/rag_logs.csv and logs/monitoring.db")
+    print("\nSimulation Completed! Logs saved to logs/rag_logs.csv and logs/monitoring.db")
 
 
 if __name__ == "__main__":

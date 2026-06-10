@@ -10,36 +10,22 @@ This script:
 
 import os
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-
-
-# ── Load environment variables from .env file ─────────────────────────────────
-load_dotenv()
-
-# ── Azure OpenAI Configuration ────────────────────────────────────────────────
-AZURE_API_KEY        = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_ENDPOINT       = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_API_VERSION    = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
-EMBEDDING_DEPLOYMENT = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
-
-# ── Paths ─────────────────────────────────────────────────────────────────────
-DOCUMENTS_DIR   = "data/documents"
-VECTORSTORE_DIR = "vectorstore/faiss_index"
-
+import config
 
 def load_documents():
     """
     Load all .txt files from the documents folder.
     Returns a list of LangChain Document objects.
     """
-    print("Loading documents from:", DOCUMENTS_DIR)
+    print("Loading documents from:", config.DOCUMENTS_DIR)
 
     loader = DirectoryLoader(
-        DOCUMENTS_DIR,
+        config.DOCUMENTS_DIR,
         glob="**/*.txt",              # Load all .txt files
         loader_cls=TextLoader,        # Use TextLoader for .txt files
         loader_kwargs={"encoding": "utf-8"}
@@ -48,7 +34,7 @@ def load_documents():
 
     print(f"Loaded {len(docs)} document(s)")
     for doc in docs:
-        print(f"   - {doc.metadata['source']} ({len(doc.page_content)} characters)")
+        print(f"   - {doc.metadata['source']} ({len(doc.page_content)} characters)") 
 
     return docs
 
@@ -64,9 +50,9 @@ def split_documents(docs):
     print("\nSplitting documents into chunks...")
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=100,
-        length_function=len,
+        chunk_size=config.CHUNK_SIZE, #config
+        chunk_overlap=config.CHUNK_OVERLAP,
+        # length_function=len,
         separators=["\n\n", "\n", ".", " "]  # Try to split at natural boundaries
     )
 
@@ -77,47 +63,21 @@ def split_documents(docs):
 
     return chunks
 
-
-def create_embeddings_model():
-    """
-    Initialize the Azure OpenAI embeddings model.
-    This model converts text into vectors (lists of numbers).
-    """
-    print("\nConnecting to Azure OpenAI Embeddings...")
-
-    embeddings = AzureOpenAIEmbeddings(
-        azure_deployment=EMBEDDING_DEPLOYMENT,
-        azure_endpoint=AZURE_ENDPOINT,
-        openai_api_key=AZURE_API_KEY,
-        api_version=AZURE_API_VERSION,
+def get_embeddings_model():
+    return AzureOpenAIEmbeddings(
+        azure_deployment=config.EMBEDDING_DEPLOYMENT,
+        azure_endpoint=config.AZURE_ENDPOINT,
+        api_key=config.AZURE_API_KEY,
+        api_version=config.AZURE_API_VERSION,
     )
 
-    print(f"✅ Embeddings model ready: {EMBEDDING_DEPLOYMENT}")
-    return embeddings
-
-
-def build_faiss_index(chunks, embeddings):
-    """
-    Convert all chunks into vectors and store them in FAISS.
-    FAISS (Facebook AI Similarity Search) enables fast nearest-neighbor search.
-    """
-    print(f"\n Building FAISS index with {len(chunks)} chunks...")
-    print("   (This may take a minute — we're calling Azure OpenAI for each chunk)")
-
-    # Create the FAISS vector store from the chunks and embeddings
+def build_and_save_index(chunks, embeddings):
+    print(f"\nBuilding FAISS index with {len(chunks)} chunks...")
     vectorstore = FAISS.from_documents(chunks, embeddings)
-
-    print("FAISS index built successfully")
+    os.makedirs(config.VECTORSTORE_DIR, exist_ok=True)
+    vectorstore.save_local(config.VECTORSTORE_DIR)
+    print(f"  Saved to: {config.VECTORSTORE_DIR}")
     return vectorstore
-
-
-def save_index(vectorstore):
-    """Save the FAISS index to disk so we don't rebuild it every time."""
-    print(f"\nSaving FAISS index to: {VECTORSTORE_DIR}")
-    os.makedirs(VECTORSTORE_DIR, exist_ok=True)
-    vectorstore.save_local(VECTORSTORE_DIR)
-    print("Index saved!")
-
 
 def test_retrieval(vectorstore):
     """Quick test to verify the index works correctly."""
@@ -136,33 +96,15 @@ def test_retrieval(vectorstore):
 
 
 def main():
-    print("=" * 60)
+    print("=" * 55)
     print(" Dataset Setup & FAISS Index Creation")
-    print("=" * 60)
-
-    # Step 1: Load all documents
-    docs = load_documents()
-
-    # Step 2: Split into chunks
-    chunks = split_documents(docs)
-
-    # Step 3: Create embedding model connection
-    embeddings = create_embeddings_model()
-
-    # Step 4: Build FAISS vector index
-    vectorstore = build_faiss_index(chunks, embeddings)
-
-    # Step 5: Save to disk
-    save_index(vectorstore)
-
-    # Step 6: Test it works
+    print("=" * 55)
+    docs        = load_documents()
+    chunks      = split_documents(docs)
+    embeddings  = get_embeddings_model()
+    vectorstore = build_and_save_index(chunks, embeddings)
     test_retrieval(vectorstore)
-
-    print("\n" + "=" * 60)
-    print("TASK COMPLETE!")
-    print("   FAISS index is ready at:", VECTORSTORE_DIR)
-    print("   Next step: Run rag_pipeline.py to test the full RAG system")
-    print("=" * 60)
+    print("\nInitial Setup Completed")
 
 
 if __name__ == "__main__":
