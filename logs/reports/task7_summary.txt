@@ -1,17 +1,17 @@
 LLM MONITORING PLATFORM — SYSTEM EVALUATION SUMMARY
-Generated: 2026-06-10T18:30:49
+Generated: 2026-06-10T23:58:45
 
 HEALTH SCORE: 79.7/100 (Grade B)
 
-REQUESTS: 362 total | 100.0% success | 0.00% errors
+REQUESTS: 591 total | 100.0% success | 0.00% errors
 
-TOKENS: 193,227 total | avg 534/req | cost $1.2932
+TOKENS: 314,615 total | avg 532/req | cost $2.1264
 
-LATENCY: avg 2.127s | p95 3.776s | 0 slow requests
+LATENCY: avg 2.230s | p95 4.236s | 3 slow requests
 
 RAG SCORES: context_rel=0.557 | faithfulness=0.899 | groundedness=0.746
 HALLUCINATIONS: 16 detected
 
 DRIFT: avg=0.3357 | status=ANOMALY | 20 anomalies
 
-SAFETY: 7 flagged requests
+SAFETY: 27 flagged requests

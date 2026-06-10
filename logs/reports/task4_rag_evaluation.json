@@ -1,10 +1,10 @@
 {
-  "total_evaluated": 179,
-  "avg_context_relevance": 0.557,
-  "avg_faithfulness": 0.899,
-  "avg_groundedness": 0.746,
-  "avg_overall": 0.734,
+  "total_evaluated": 229,
+  "avg_context_relevance": 0.435,
+  "avg_faithfulness": 0.703,
+  "avg_groundedness": 0.583,
+  "avg_overall": 0.574,
   "hallucination_count": 14,
   "high_quality_count": 118,
-  "low_quality_count": 35
+  "low_quality_count": 85
 }

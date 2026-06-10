@@ -1,50 +1,50 @@
 {
-  "generated_at": "2026-06-10T18:30:49",
+  "generated_at": "2026-06-10T23:58:45",
   "token_analysis": {
-    "total_requests": 362,
-    "total_tokens": 193227,
-    "total_input": 160516,
-    "total_output": 32711,
-    "avg_tokens": 533.8,
-    "max_tokens": 1243,
-    "min_tokens": 250,
-    "std_tokens": 94.5,
-    "total_cost_usd": 1.2932,
-    "avg_cost_per_req": 0.003573,
-    "v1_avg_tokens": 527.0,
-    "v2_avg_tokens": 542.7,
+    "total_requests": 591,
+    "total_tokens": 314615,
+    "total_input": 259280,
+    "total_output": 55335,
+    "avg_tokens": 532.3,
+    "max_tokens": 1343,
+    "min_tokens": 245,
+    "std_tokens": 125.3,
+    "total_cost_usd": 2.1264,
+    "avg_cost_per_req": 0.003598,
+    "v1_avg_tokens": 526.8,
+    "v2_avg_tokens": 542.6,
     "high_token_count": 0,
     "high_token_pct": 0.0
   },
   "latency_analysis": {
     "end_to_end": {
-      "avg": 2.127,
-      "min": 1.0942,
-      "max": 6.5574,
-      "p50": 1.9474,
-      "p95": 3.7763,
-      "p99": 5.4271
+      "avg": 2.2304,
+      "min": 1.0139,
+      "max": 12.0979,
+      "p50": 1.9122,
+      "p95": 4.2357,
+      "p99": 6.9729
     },
     "llm_api": {
-      "avg": 1.6705,
+      "avg": 1.7764,
       "min": 0.6581,
-      "max": 6.1607,
-      "p50": 1.5241,
-      "p95": 3.1171,
-      "p99": 4.3655
+      "max": 11.7341,
+      "p50": 1.5063,
+      "p95": 3.3702,
+      "p99": 6.63
     },
     "retrieval": {
-      "avg": 0.4564,
-      "min": 0.3424,
-      "max": 2.4088,
-      "p50": 0.403,
-      "p95": 0.6868,
-      "p99": 1.7202
+      "avg": 0.454,
+      "min": 0.3183,
+      "max": 2.7668,
+      "p50": 0.3896,
+      "p95": 1.1208,
+      "p99": 1.8074
     },
-    "slow_count": 0,
-    "slow_pct": 0.0,
-    "llm_share_pct": 78.5,
-    "retr_share_pct": 21.5
+    "slow_count": 3,
+    "slow_pct": 0.5,
+    "llm_share_pct": 79.6,
+    "retr_share_pct": 20.4
   },
   "rag_evaluation": {
     "available": true,
@@ -122,14 +122,14 @@
     ]
   },
   "safety_errors": {
-    "total_requests": 362,
+    "total_requests": 591,
     "error_count": 0,
     "error_rate_pct": 0.0,
-    "safety_count": 7,
-    "safety_rate_pct": 1.93,
+    "safety_count": 27,
+    "safety_rate_pct": 4.57,
     "error_breakdown": {},
     "safety_by_version": {
-      "v1": 7
+      "v1": 27
     },
     "success_rate_pct": 100.0
   },
