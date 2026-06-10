@@ -1,42 +1,39 @@
 {
-  "generated_at": "2026-06-05T16:57:07",
   "token_stats": {
-    "total_requests": 104,
-    "total_input_tokens": 46362,
-    "total_output_tokens": 9580,
-    "total_tokens": 55942,
-    "avg_input_tokens": 445.79,
-    "avg_output_tokens": 92.12,
-    "avg_total_tokens": 537.9,
+    "total_requests": 233,
+    "total_tokens": 124091,
+    "avg_tokens": 532.6,
     "max_tokens": 758,
-    "min_tokens": 405,
-    "total_cost_usd": 0.37551,
-    "avg_cost_per_req": 0.003611,
-    "expensive_requests": [],
-    "expensive_count": 0
+    "min_tokens": 363,
+    "total_cost_usd": 0.823,
+    "avg_cost_per_req": 0.003532,
+    "high_token_count": 0,
+    "high_token_pct": 0.0
   },
   "latency_stats": {
     "retrieval": {
-      "avg": 0.4309,
+      "avg": 0.455,
       "min": 0.3424,
-      "max": 1.6805,
-      "p95": 0.6411
+      "max": 2.4088,
+      "p95": 0.609,
+      "p99": 1.6805
     },
     "llm": {
-      "avg": 1.6073,
+      "avg": 1.6152,
       "min": 0.6581,
-      "max": 4.3655,
-      "p95": 3.0456
+      "max": 5.2716,
+      "p95": 3.0456,
+      "p99": 4.1146
     },
     "end_to_end": {
-      "avg": 2.0381,
+      "avg": 2.0701,
       "min": 1.0942,
-      "max": 5.3674,
-      "p95": 3.4719
+      "max": 5.7259,
+      "p95": 3.4825,
+      "p99": 5.3674
     },
-    "slow_requests": [],
     "slow_count": 0,
-    "latency_threshold": 10.0,
+    "slow_pct": 0.0,
     "e2e_series": [
       {
         "timestamp": "2026-06-05T16:39:07",
@@ -453,31 +450,547 @@
       {
         "timestamp": "2026-06-05T16:44:21",
         "latency": 2.5719
+      },
+      {
+        "timestamp": "2026-06-08T14:17:28",
+        "latency": 4.1916
+      },
+      {
+        "timestamp": "2026-06-08T14:17:33",
+        "latency": 1.4033
+      },
+      {
+        "timestamp": "2026-06-08T14:17:36",
+        "latency": 1.6464
+      },
+      {
+        "timestamp": "2026-06-08T14:17:38",
+        "latency": 1.2752
+      },
+      {
+        "timestamp": "2026-06-08T14:17:41",
+        "latency": 1.5772
+      },
+      {
+        "timestamp": "2026-06-08T14:17:43",
+        "latency": 2.017
+      },
+      {
+        "timestamp": "2026-06-08T14:17:46",
+        "latency": 1.5961
+      },
+      {
+        "timestamp": "2026-06-08T14:17:49",
+        "latency": 2.4629
+      },
+      {
+        "timestamp": "2026-06-08T14:17:52",
+        "latency": 2.2497
+      },
+      {
+        "timestamp": "2026-06-08T14:17:56",
+        "latency": 2.3184
+      },
+      {
+        "timestamp": "2026-06-08T14:17:59",
+        "latency": 1.9611
+      },
+      {
+        "timestamp": "2026-06-08T14:18:02",
+        "latency": 2.1139
+      },
+      {
+        "timestamp": "2026-06-08T14:18:05",
+        "latency": 1.7365
+      },
+      {
+        "timestamp": "2026-06-08T14:18:08",
+        "latency": 1.539
+      },
+      {
+        "timestamp": "2026-06-08T14:18:10",
+        "latency": 1.9995
+      },
+      {
+        "timestamp": "2026-06-08T14:18:13",
+        "latency": 1.7481
+      },
+      {
+        "timestamp": "2026-06-08T14:18:16",
+        "latency": 1.3446
+      },
+      {
+        "timestamp": "2026-06-08T14:18:19",
+        "latency": 1.6507
+      },
+      {
+        "timestamp": "2026-06-08T14:18:21",
+        "latency": 1.3938
+      },
+      {
+        "timestamp": "2026-06-08T14:18:24",
+        "latency": 2.1007
+      },
+      {
+        "timestamp": "2026-06-08T14:18:27",
+        "latency": 1.5618
+      },
+      {
+        "timestamp": "2026-06-08T14:18:29",
+        "latency": 1.5585
+      },
+      {
+        "timestamp": "2026-06-08T14:18:32",
+        "latency": 1.5567
+      },
+      {
+        "timestamp": "2026-06-08T14:18:34",
+        "latency": 2.8819
+      },
+      {
+        "timestamp": "2026-06-08T14:18:38",
+        "latency": 2.1336
+      },
+      {
+        "timestamp": "2026-06-10T15:47:48",
+        "latency": 5.4271
+      },
+      {
+        "timestamp": "2026-06-10T15:47:55",
+        "latency": 2.0121
+      },
+      {
+        "timestamp": "2026-06-10T15:47:58",
+        "latency": 1.6587
+      },
+      {
+        "timestamp": "2026-06-10T15:48:00",
+        "latency": 2.9023
+      },
+      {
+        "timestamp": "2026-06-10T15:48:04",
+        "latency": 3.2931
+      },
+      {
+        "timestamp": "2026-06-10T15:48:08",
+        "latency": 2.2718
+      },
+      {
+        "timestamp": "2026-06-10T15:48:12",
+        "latency": 4.0085
+      },
+      {
+        "timestamp": "2026-06-10T15:48:17",
+        "latency": 1.9502
+      },
+      {
+        "timestamp": "2026-06-10T15:48:20",
+        "latency": 2.1974
+      },
+      {
+        "timestamp": "2026-06-10T15:48:23",
+        "latency": 2.002
+      },
+      {
+        "timestamp": "2026-06-10T15:48:26",
+        "latency": 2.0627
+      },
+      {
+        "timestamp": "2026-06-10T15:48:29",
+        "latency": 2.7313
+      },
+      {
+        "timestamp": "2026-06-10T15:48:33",
+        "latency": 2.3306
+      },
+      {
+        "timestamp": "2026-06-10T15:48:36",
+        "latency": 1.9043
+      },
+      {
+        "timestamp": "2026-06-10T15:48:39",
+        "latency": 1.9113
+      },
+      {
+        "timestamp": "2026-06-10T15:48:42",
+        "latency": 2.8693
+      },
+      {
+        "timestamp": "2026-06-10T15:48:46",
+        "latency": 2.621
+      },
+      {
+        "timestamp": "2026-06-10T15:48:49",
+        "latency": 2.5577
+      },
+      {
+        "timestamp": "2026-06-10T15:48:53",
+        "latency": 1.8713
+      },
+      {
+        "timestamp": "2026-06-10T15:48:56",
+        "latency": 2.189
+      },
+      {
+        "timestamp": "2026-06-10T15:48:59",
+        "latency": 1.8995
+      },
+      {
+        "timestamp": "2026-06-10T15:49:02",
+        "latency": 1.6819
+      },
+      {
+        "timestamp": "2026-06-10T15:49:05",
+        "latency": 1.6698
+      },
+      {
+        "timestamp": "2026-06-10T15:49:07",
+        "latency": 1.5905
+      },
+      {
+        "timestamp": "2026-06-10T15:49:10",
+        "latency": 3.1975
+      },
+      {
+        "timestamp": "2026-06-10T15:49:14",
+        "latency": 1.326
+      },
+      {
+        "timestamp": "2026-06-10T15:49:17",
+        "latency": 3.253
+      },
+      {
+        "timestamp": "2026-06-10T15:49:21",
+        "latency": 1.6447
+      },
+      {
+        "timestamp": "2026-06-10T15:49:24",
+        "latency": 2.5067
+      },
+      {
+        "timestamp": "2026-06-10T15:49:27",
+        "latency": 1.2942
+      },
+      {
+        "timestamp": "2026-06-10T15:49:29",
+        "latency": 1.2477
+      },
+      {
+        "timestamp": "2026-06-10T15:49:32",
+        "latency": 2.7027
+      },
+      {
+        "timestamp": "2026-06-10T15:49:35",
+        "latency": 1.5215
+      },
+      {
+        "timestamp": "2026-06-10T15:49:38",
+        "latency": 3.2674
+      },
+      {
+        "timestamp": "2026-06-10T15:49:42",
+        "latency": 1.4789
+      },
+      {
+        "timestamp": "2026-06-10T15:49:45",
+        "latency": 1.6954
+      },
+      {
+        "timestamp": "2026-06-10T15:49:48",
+        "latency": 5.7259
+      },
+      {
+        "timestamp": "2026-06-10T15:49:54",
+        "latency": 2.5817
+      },
+      {
+        "timestamp": "2026-06-10T15:49:58",
+        "latency": 1.998
+      },
+      {
+        "timestamp": "2026-06-10T15:50:01",
+        "latency": 1.1166
+      },
+      {
+        "timestamp": "2026-06-10T15:50:03",
+        "latency": 2.1169
+      },
+      {
+        "timestamp": "2026-06-10T15:50:06",
+        "latency": 3.1038
+      },
+      {
+        "timestamp": "2026-06-10T15:50:10",
+        "latency": 2.3973
+      },
+      {
+        "timestamp": "2026-06-10T15:50:14",
+        "latency": 1.4667
+      },
+      {
+        "timestamp": "2026-06-10T15:50:16",
+        "latency": 1.5817
+      },
+      {
+        "timestamp": "2026-06-10T15:50:19",
+        "latency": 1.9711
+      },
+      {
+        "timestamp": "2026-06-10T15:50:22",
+        "latency": 2.1351
+      },
+      {
+        "timestamp": "2026-06-10T15:50:25",
+        "latency": 1.7437
+      },
+      {
+        "timestamp": "2026-06-10T15:50:28",
+        "latency": 1.6887
+      },
+      {
+        "timestamp": "2026-06-10T15:50:30",
+        "latency": 2.8857
+      },
+      {
+        "timestamp": "2026-06-10T15:50:34",
+        "latency": 1.9285
+      },
+      {
+        "timestamp": "2026-06-10T15:50:37",
+        "latency": 2.3229
+      },
+      {
+        "timestamp": "2026-06-10T15:50:41",
+        "latency": 3.4953
+      },
+      {
+        "timestamp": "2026-06-10T15:50:45",
+        "latency": 1.6442
+      },
+      {
+        "timestamp": "2026-06-10T15:50:48",
+        "latency": 4.5009
+      },
+      {
+        "timestamp": "2026-06-10T15:50:53",
+        "latency": 3.0705
+      },
+      {
+        "timestamp": "2026-06-10T15:50:57",
+        "latency": 1.891
+      },
+      {
+        "timestamp": "2026-06-10T15:51:00",
+        "latency": 2.0161
+      },
+      {
+        "timestamp": "2026-06-10T15:51:03",
+        "latency": 2.0967
+      },
+      {
+        "timestamp": "2026-06-10T15:51:07",
+        "latency": 2.8404
+      },
+      {
+        "timestamp": "2026-06-10T15:51:10",
+        "latency": 1.5078
+      },
+      {
+        "timestamp": "2026-06-10T15:51:13",
+        "latency": 1.3592
+      },
+      {
+        "timestamp": "2026-06-10T15:51:15",
+        "latency": 1.6238
+      },
+      {
+        "timestamp": "2026-06-10T15:51:18",
+        "latency": 1.4043
+      },
+      {
+        "timestamp": "2026-06-10T15:51:20",
+        "latency": 1.7751
+      },
+      {
+        "timestamp": "2026-06-10T15:51:23",
+        "latency": 2.4763
+      },
+      {
+        "timestamp": "2026-06-10T15:51:27",
+        "latency": 2.1036
+      },
+      {
+        "timestamp": "2026-06-10T15:51:30",
+        "latency": 1.6282
+      },
+      {
+        "timestamp": "2026-06-10T15:51:32",
+        "latency": 1.5934
+      },
+      {
+        "timestamp": "2026-06-10T15:51:35",
+        "latency": 1.1979
+      },
+      {
+        "timestamp": "2026-06-10T15:51:37",
+        "latency": 1.6497
+      },
+      {
+        "timestamp": "2026-06-10T15:51:40",
+        "latency": 1.4285
+      },
+      {
+        "timestamp": "2026-06-10T15:51:42",
+        "latency": 1.6732
+      },
+      {
+        "timestamp": "2026-06-10T15:51:45",
+        "latency": 2.8701
+      },
+      {
+        "timestamp": "2026-06-10T15:51:49",
+        "latency": 2.8024
+      },
+      {
+        "timestamp": "2026-06-10T15:51:53",
+        "latency": 2.2963
+      },
+      {
+        "timestamp": "2026-06-10T15:51:56",
+        "latency": 1.2657
+      },
+      {
+        "timestamp": "2026-06-10T15:51:58",
+        "latency": 1.1924
+      },
+      {
+        "timestamp": "2026-06-10T15:52:01",
+        "latency": 1.607
+      },
+      {
+        "timestamp": "2026-06-10T15:52:03",
+        "latency": 1.9097
+      },
+      {
+        "timestamp": "2026-06-10T15:52:06",
+        "latency": 3.5345
+      },
+      {
+        "timestamp": "2026-06-10T15:52:11",
+        "latency": 1.1583
+      },
+      {
+        "timestamp": "2026-06-10T15:52:13",
+        "latency": 1.5676
+      },
+      {
+        "timestamp": "2026-06-10T15:52:15",
+        "latency": 1.3702
+      },
+      {
+        "timestamp": "2026-06-10T15:52:18",
+        "latency": 1.6047
+      },
+      {
+        "timestamp": "2026-06-10T15:52:20",
+        "latency": 1.2737
+      },
+      {
+        "timestamp": "2026-06-10T15:52:23",
+        "latency": 1.2199
+      },
+      {
+        "timestamp": "2026-06-10T15:52:25",
+        "latency": 1.1451
+      },
+      {
+        "timestamp": "2026-06-10T15:52:27",
+        "latency": 2.5912
+      },
+      {
+        "timestamp": "2026-06-10T15:52:31",
+        "latency": 2.5721
+      },
+      {
+        "timestamp": "2026-06-10T15:52:34",
+        "latency": 1.6008
+      },
+      {
+        "timestamp": "2026-06-10T15:52:37",
+        "latency": 1.9119
+      },
+      {
+        "timestamp": "2026-06-10T15:52:40",
+        "latency": 2.2151
+      },
+      {
+        "timestamp": "2026-06-10T15:52:43",
+        "latency": 2.7961
+      },
+      {
+        "timestamp": "2026-06-10T15:52:47",
+        "latency": 2.1264
+      },
+      {
+        "timestamp": "2026-06-10T15:52:50",
+        "latency": 2.7153
+      },
+      {
+        "timestamp": "2026-06-10T15:52:54",
+        "latency": 1.3291
+      },
+      {
+        "timestamp": "2026-06-10T15:52:56",
+        "latency": 2.1434
+      },
+      {
+        "timestamp": "2026-06-10T15:52:59",
+        "latency": 2.3394
+      },
+      {
+        "timestamp": "2026-06-10T15:53:03",
+        "latency": 1.3223
+      },
+      {
+        "timestamp": "2026-06-10T15:53:05",
+        "latency": 1.4797
+      },
+      {
+        "timestamp": "2026-06-10T15:53:07",
+        "latency": 1.1764
+      },
+      {
+        "timestamp": "2026-06-10T15:53:10",
+        "latency": 1.5907
+      },
+      {
+        "timestamp": "2026-06-10T15:53:12",
+        "latency": 3.1458
       }
     ]
   },
   "version_stats": {
     "v1": {
-      "prompt_text": "Use provided context to answer the user's question. If the answer is not in the context, say so.",
-      "total_requests": 52,
-      "success_count": 52,
+      "prompt_text": "You are a helpful AI assistant. Use the provided context to answer the user's qu",
+      "total_requests": 129,
+      "success_count": 129,
       "error_count": 0,
       "error_rate_pct": 0.0,
-      "avg_tokens": 528.12,
-      "avg_latency": 2.0969,
-      "total_cost": 0.18652,
-      "avg_cost": 0.003587
+      "avg_tokens": 524.2,
+      "avg_latency": 2.1207,
+      "total_cost": 0.45131,
+      "avg_cost": 0.003499
     },
     "v2": {
-      "prompt_text": "Be concise and ensure evidence grounding. Cite specific details from the context. If not in context, explicitly state: 'This information is not available in the provided documents.'",
-      "total_requests": 52,
-      "success_count": 52,
+      "prompt_text": "You are an expert AI assistant. Be concise and ensure your answer is fully groun",
+      "total_requests": 104,
+      "success_count": 104,
       "error_count": 0,
       "error_rate_pct": 0.0,
-      "avg_tokens": 547.69,
-      "avg_latency": 1.9793,
-      "total_cost": 0.18899,
-      "avg_cost": 0.003634
+      "avg_tokens": 542.97,
+      "avg_latency": 2.0074,
+      "total_cost": 0.371655,
+      "avg_cost": 0.003574
     },
     "comparison": {
       "cheaper_version": "v1",
@@ -485,14 +998,5 @@
       "lower_error_rate": "v1"
     }
   },
-  "daily_usage": [
-    {
-      "date": "2026-06-05",
-      "daily_input": 46362,
-      "daily_output": 9580,
-      "daily_total": 55942,
-      "request_count": 104,
-      "estimated_cost": 0.37551
-    }
-  ]
+  "generated_at": "2026-06-10T15:53:33"
 }

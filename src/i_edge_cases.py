@@ -22,13 +22,10 @@ import time
 import csv
 import json
 # from dotenv import load_dotenv
-from rag_pipeline import load_vectorstore, load_llm, rag_query
-from logger_middleware import LLMLogger
+from b_rag_pipeline import load_vectorstore, load_llm, rag_query
+from c_logger_middleware import LLMLogger
 import config
 
-# load_dotenv()
-
-# EDGE_CASES_LOG = "logs/edge_cases_log.csv"
 
 # ── 25 deliberate edge case prompts ───────────────────────────────────────────
 EDGE_CASES = [
@@ -237,7 +234,7 @@ def run_edge_cases():
     print("=" * 65)
     print("  TASK 7: Edge Case Testing")
     print("=" * 65)
-    print(f"\n  Running {len(EDGE_CASES)} deliberate edge cases...\n")
+    print(f"\nRunning {len(EDGE_CASES)} deliberate edge cases...\n")
     print("-" * 65)
 
     vectorstore = load_vectorstore()
@@ -280,9 +277,9 @@ def run_edge_cases():
         }
         results.append(outcome)
 
-        flag_icon = "🚩" if result["safety_flag"] else "  "
-        err_icon  = "❌" if result["error_code"]  else "✅"
-        print(f"         {err_icon} {flag_icon} tokens={result['total_tokens']} "
+        flag_icon = "FLAG" if result["safety_flag"] else "SAFE"
+        err_icon  = "ERROR" if result["error_code"]  else "NO_ERRORS"
+        print(f"       {err_icon} | {flag_icon} | tokens={result['total_tokens']} "
               f"latency={result['end_to_end_latency']}s")
 
         time.sleep(1.0)
@@ -310,7 +307,7 @@ def run_edge_cases():
         flags  = sum(1 for x in items if x["safety_flag"])
         errors = sum(1 for x in items if x["error_code"] != "None")
         print(f"  {cat:<18} : {len(items)} cases | "
-              f"🚩 flags={flags} | ❌ errors={errors}")
+              f"flags={flags} | errors={errors}")
 
     print(f"\n  Total safety flags  : {safety_triggered}/{len(EDGE_CASES)}")
     print(f"  Total errors caught : {errors_caught}/{len(EDGE_CASES)}")

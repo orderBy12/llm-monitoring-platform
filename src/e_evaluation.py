@@ -25,17 +25,6 @@ import statistics
 from datetime import datetime
 import config
 
-# DB_FILE     = "logs/monitoring.db"
-# REPORTS_DIR = "logs/reports"
-
-# ── Thresholds ─────────────────────────────────────────────────────────────────
-# LATENCY_SLOW_THRESHOLD     = 10.0
-# TOKEN_HIGH_THRESHOLD       = 2000
-# FAITHFULNESS_HALLU_THRESHOLD = 0.4
-# RAG_LOW_QUALITY_THRESHOLD  = 0.5
-# DRIFT_WARNING_THRESHOLD    = 0.10
-# DRIFT_ANOMALY_THRESHOLD    = 0.20
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Database helpers
@@ -368,12 +357,12 @@ def print_report(tokens, latency, rag, drift, safety, health):
               f"p50={s.get('p50',0):.3f}s  "
               f"p95={s.get('p95',0):.3f}s  "
               f"max={s.get('max',0):.3f}s")
-    print(f"\n  LLM share of E2E     : {latency.get('llm_share_pct', 0):.1f}%")
-    print(f"  Retrieval share      : {latency.get('retr_share_pct', 0):.1f}%")
-    print(f"  Slow requests (>{config.LATENCY_SLOW_THRESHOLD}s): {latency.get('slow_count', 0)} ({latency.get('slow_pct', 0):.1f}%)")
+    print(f"\n LLM share of E2E     : {latency.get('llm_share_pct', 0):.1f}%")
+    print(f" Retrieval share      : {latency.get('retr_share_pct', 0):.1f}%")
+    print(f" Slow requests (>{config.LATENCY_SLOW_THRESHOLD}s): {latency.get('slow_count', 0)} ({latency.get('slow_pct', 0):.1f}%)")
 
     # ── RAG Evaluation ─────────────────────────────────────────────────────────
-    print("\nRAG EVALUATION METRICS")
+    print("\n RAG EVALUATION METRICS")
     print("─" * 40)
     if rag.get("available"):
         print(f"  Requests evaluated   : {rag.get('total_evaluated', 0)}")
@@ -388,13 +377,13 @@ def print_report(tokens, latency, rag, drift, safety, health):
             for q in rag["worst_queries"]:
                 print(f"    overall={q['overall']:.2f}  faith={q['faith']:.2f}  \"{q['query'][:55]}\"")
     else:
-        print("  No evaluations found. Run rag_evaluator.py first.")
+        print("No evaluations found. Run rag_evaluator.py first.")
 
     # ── Drift ──────────────────────────────────────────────────────────────────
-    print("\nEMBEDDING DRIFT")
+    print("\n EMBEDDING DRIFT")
     print("─" * 40)
     if drift.get("available"):
-        status_icon = {"HEALTHY": "✅", "WARNING": "⚠️ ", "ANOMALY": "🚨"}
+        status_icon = {"HEALTHY": "Stable", "WARNING": "Needs attention", "ANOMALY": "Critical"}
         print(f"  Measurement runs     : {drift.get('total_runs', 0)}")
         print(f"  Avg drift score      : {drift.get('avg_drift', 0):.4f}")
         print(f"  Max drift score      : {drift.get('max_drift', 0):.4f}")
@@ -402,7 +391,9 @@ def print_report(tokens, latency, rag, drift, safety, health):
         print(f"  Warning queries      : {drift.get('warning_count', 0)}")
         print(f"  Anomaly queries      : {drift.get('anomaly_count', 0)} ({drift.get('anomaly_pct', 0):.1f}%)")
         h = drift.get("overall_health", "UNKNOWN")
-        print(f"  Overall drift status : {status_icon.get(h, '')} {h}")
+        status_label = status_icon.get(h, "UNKNOWN")
+        print(f"  Overall drift status : {h} - {status_label}")
+        # print(f"  Overall drift status : {status_icon.get(h, '')} {h}")
     else:
         print(" No drift data. Run drift_detector.py first.")
 
@@ -424,8 +415,9 @@ def print_report(tokens, latency, rag, drift, safety, health):
     print("═" * 62)
     grade = health.get("grade", "N/A")
     score = health.get("composite_score", 0)
-    grade_color = {"A": "✅", "B": "🟡", "C": "🟠", "D": "🔴"}.get(grade, "⚪")
-    print(f"\n  {grade_color} Grade: {grade}   Score: {score}/100\n")
+    grade_color = {"A": "Excellent", "B": "Good", "C": "Fair", "D": "Poor"}.get(grade, "Unknown")
+    # print(f"\n  {grade_color} Grade: {grade}   Score: {score}/100\n")
+    print(f"\n  Grade: {grade} ({grade_color})   Score: {score}/100\n")
     for dim, val in health.get("dimension_scores", {}).items():
         bar = "█" * int(val / 5)
         print(f"  {dim:<20} {val:5.1f}/100  {bar}")

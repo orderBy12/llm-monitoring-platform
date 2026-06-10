@@ -15,28 +15,10 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.messages import HumanMessage, SystemMessage
 import config
 
-# load_dotenv()
 
 _vectorstore = None
 _llm         = None
 
-# # ── Prompt Versions ────────────────────────────────────────────────────────────
-# #Define different system prompts for different versions of the RAG pipeline for experimentation
-# PROMPT_VERSIONS = {
-#     "v1": (
-#         "You are a helpful AI assistant. Use the provided context to answer "
-#         "the user's question. If the answer is not in the context, say so."
-#     ),
-#     "v2": (
-#         "You are an expert AI assistant. Be concise and ensure your answer is "
-#         "fully grounded in the provided evidence. Cite specific details from "
-#         "the context. If the answer is not in the context, explicitly state: "
-#         "'This information is not available in the provided documents.'"
-#     ),
-# }
-
-# Default prompt version to use
-# DEFAULT_PROMPT_VERSION = "v1"
 
 # ── Load FAISS Index & Models ──────────────────────────────────────────────────
 

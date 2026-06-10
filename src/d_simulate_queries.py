@@ -12,8 +12,8 @@ Note: This is a simulation using static prompts. In real monitoring, queries wou
 
 import time
 import pandas as pd
-from rag_pipeline import load_vectorstore, load_llm, rag_query
-from logger_middleware import LLMLogger        
+from b_rag_pipeline import load_vectorstore, load_llm, rag_query
+from c_logger_middleware import LLMLogger        
 import config
 
 def run_simulation():
