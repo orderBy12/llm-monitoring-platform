@@ -143,10 +143,10 @@ erDiagram
 | `b_rag_pipeline.py` | FAISS index | — | Embeddings + Chat |
 | `c_logger_middleware.py` | RAG result | `llm_logs`, `rag_logs.csv` | — |
 | `d_simulate_queries.py` | `prompts.csv` | via Logger | Indirect via RAG |
-| `f_token_latency_tracker.py` | `llm_logs` | `task3_*.json` | — |
-| `g_rag_evaluator.py` | `llm_logs` | `rag_evaluations`, `task4_*.json` | Chat (judge) |
-| `h_drift_detector.py` | `reference_queries.json` | `drift_logs`, `drift_baseline.json`, `task5_*.json` | Embeddings |
-| `i_edge_cases.py` | hardcoded prompts | `edge_cases_log.csv` via Logger | Indirect via RAG |
-| `e_evaluation.py` | all three SQLite tables | `task7_*.json`, `task7_summary.txt` | — |
+| `e_token_latency_tracker.py` | `llm_logs` | `task3_*.json` | — |
+| `f_rag_evaluator.py` | `llm_logs` | `rag_evaluations`, `task4_*.json` | Chat (judge) |
+| `g_drift_detector.py` | `reference_queries.json` | `drift_logs`, `drift_baseline.json`, `task5_*.json` | Embeddings |
+| `h_edge_cases.py` | hardcoded prompts | `edge_cases_log.csv` via Logger | Indirect via RAG |
+| `i_evaluation.py` | all three SQLite tables | `task7_*.json`, `task7_summary.txt` | — |
 | `dashboard.py` | `monitoring.db`, all JSON reports | — | — |
 | `config.py` | `.env` | — | — |
