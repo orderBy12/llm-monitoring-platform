@@ -33,13 +33,13 @@ The platform is organized as lettered scripts under `src/`. All shared settings 
 | `b_rag_pipeline.py` | RAG query engine (retrieval + Azure OpenAI generation) |
 | `c_logger_middleware.py` | `LLMLogger` — persists request metadata to CSV and SQLite |
 | `d_simulate_queries.py` | Fire 105 prompts through the pipeline (alternates v1/v2) |
-| `f_token_latency_tracker.py` | Aggregate token usage, estimate costs, compute latency percentiles |
-| `g_rag_evaluator.py` | Score each request on context relevance, faithfulness, and groundedness |
-| `h_drift_detector.py` | Measure embedding drift against a fixed baseline; flag anomalies |
-| `i_edge_cases.py` | Test 25 adversarial and boundary prompts across 9 categories (Task 7 Part A) |
-| `e_evaluation.py` | Composite health score (0–100, grade A–D) from all monitoring dimensions (Task 7 Part B) |
+| `e_token_latency_tracker.py` | Aggregate token usage, estimate costs, compute latency percentiles |
+| `f_rag_evaluator.py` | Score each request on context relevance, faithfulness, and groundedness |
+| `g_drift_detector.py` | Measure embedding drift against a fixed baseline; flag anomalies |
+| `h_edge_cases.py` | Test 25 adversarial and boundary prompts across 9 categories (Task 7 Part A) |
+| `i_evaluation.py` | Composite health score (0–100, grade A–D) from all monitoring dimensions (Task 7 Part B) |
 
-> **Run order:** `a` → `b` (smoke test) → `d` → `f` → `g` → `h` → `i` → `e`. Note that `e_evaluation.py` is the final report step despite its letter position; `c_logger_middleware.py` is a shared module imported by other scripts and not run directly.
+> **Run order:** `a` → `b` (smoke test) → `d` → `e`→ `f` → `g` → `h` → `i`. `c_logger_middleware.py` is a shared module imported by other scripts and not run directly.
 
 ---
 
@@ -93,11 +93,11 @@ llm-monitoring-platform/
 │   ├── b_rag_pipeline.py          # RAG query engine (retrieval + generation)
 │   ├── c_logger_middleware.py     # LLMLogger: writes to CSV and SQLite
 │   ├── d_simulate_queries.py      # Fire 105 prompts through the pipeline
-│   ├── e_evaluation.py            # Final system health report (Task 7 Part B)
-│   ├── f_token_latency_tracker.py # Token usage, cost, and latency reports
-│   ├── g_rag_evaluator.py         # LLM-as-judge quality scoring
-│   ├── h_drift_detector.py        # Embedding drift baseline and measurement
-│   ├── i_edge_cases.py            # Adversarial and boundary prompt testing (Task 7 Part A)
+│   ├── e_token_latency_tracker.py # Token usage, cost, and latency reports
+│   ├── f_rag_evaluator.py         # LLM-as-judge quality scoring
+│   ├── g_drift_detector.py        # Embedding drift baseline and measurement
+│   ├── h_edge_cases.py            # Adversarial and boundary prompt testing (Task 7 Part A)
+│   ├── i_evaluation.py            # Final system health report (Task 7 Part B)
 │   └── sqlite.ipynb               # Notebook for ad-hoc SQLite exploration
 │
 ├── data/
@@ -234,7 +234,7 @@ Fires all 105 prompts from `data/prompts.csv` through the RAG pipeline, alternat
 ### Step 3 — Token and latency tracking
 
 ```bash
-python src/f_token_latency_tracker.py
+python src/e_token_latency_tracker.py
 ```
 
 Reads `logs/monitoring.db` and writes `logs/reports/task3_tracking_report.json` with:
@@ -246,7 +246,7 @@ Reads `logs/monitoring.db` and writes `logs/reports/task3_tracking_report.json` 
 ### Step 4 — RAG quality evaluation
 
 ```bash
-python src/g_rag_evaluator.py
+python src/f_rag_evaluator.py
 ```
 
 Uses an Azure OpenAI LLM judge to score each logged request on three dimensions (0.0–1.0 each):
@@ -263,10 +263,10 @@ Evaluates up to `EVAL_LIMIT=50` requests (configurable in `config.py`). Writes s
 
 ```bash
 # First time only — save baseline embeddings
-python src/h_drift_detector.py --mode baseline
+python src/g_drift_detector.py --mode baseline
 
 # On subsequent runs — measure drift against the baseline
-python src/h_drift_detector.py --mode measure
+python src/g_drift_detector.py --mode measure
 ```
 
 Re-embeds the 20 fixed queries from `data/reference_queries.json` and computes cosine similarity against the saved baseline. Drift thresholds (set in `config.py`):
@@ -280,7 +280,7 @@ Re-embeds the 20 fixed queries from `data/reference_queries.json` and computes c
 ### Step 6 — Edge case testing (Task 7 Part A)
 
 ```bash
-python src/i_edge_cases.py
+python src/h_edge_cases.py
 ```
 
 Runs 25 adversarial and boundary prompts across 9 categories (Safety, Off-Topic, Vague, Very Long, Empty-Like, Adversarial, Unanswerable, Repetitive, Mixed-Language). Results are written to `logs/edge_cases_log.csv`.
@@ -288,7 +288,7 @@ Runs 25 adversarial and boundary prompts across 9 categories (Safety, Off-Topic,
 ### Step 7 — Final system health report (Task 7 Part B)
 
 ```bash
-python src/e_evaluation.py
+python src/i_evaluation.py
 ```
 
 Aggregates all monitoring tables into a composite health score (0–100) graded A–D across five weighted dimensions:
@@ -336,11 +336,11 @@ data/prompts.csv ──►  d_simulate  ──►  c_logger  ──►  logs/mon
                      b_rag_pipeline                           │
                      (Azure OpenAI)                           │
                                                               ▼
-                                         f_token_latency_tracker  ──►  reports/
-                                         g_rag_evaluator          ──►  reports/
-                                         h_drift_detector         ──►  reports/
-                                         i_edge_cases             ──►  logs/
-                                         e_evaluation             ──►  reports/
+                                         e_token_latency_tracker  ──►  reports/
+                                         f_rag_evaluator          ──►  reports/
+                                         g_drift_detector         ──►  reports/
+                                         h_edge_cases             ──►  logs/
+                                         i_evaluation             ──►  reports/
                                                               │
                                          dashboard.py  ◄───────┘
                                          (Streamlit)
@@ -358,20 +358,20 @@ data/prompts.csv ──►  d_simulate  ──►  c_logger  ──►  logs/mon
 
 ## Known Limitations
 
-- **`e_evaluation.py` runs last, not fifth.** The final report script is alphabetically at position `e` but must be run after all other analysis scripts. See the [Run order note](#project-overview) above.
+- **`i_evaluation.py` runs last** The final report script is alphabetically at position `i` but must be run after all other analysis scripts. See the [Run order note](#project-overview) above.
 - **`logs/monitoring.db` is not committed.** The SQLite database is git-ignored and must be generated locally by running `d_simulate_queries.py`. The dashboard and all report scripts depend on it.
 - **FAISS index not committed.** `vectorstore/faiss_index/` tracks only `.gitkeep`. Run `a_setup.py` before issuing RAG queries.
 - **`PYTHONPATH` must include `src/`.** All scripts import `config` as a top-level module. Set `PYTHONPATH=src` before running any script from the repo root.
 - **No automated test suite.** There are no pytest or unittest tests. Quality assurance relies on the manual task workflow and edge case scripts.
 - **No formal Python version constraint.** The project was developed with Python 3.11. No `pyproject.toml` or `setup.py` declares a minimum version.
-- **Cost per evaluation run.** `g_rag_evaluator.py` calls Azure OpenAI once per logged request. The `EVAL_LIMIT` setting in `config.py` caps evaluation at 50 requests by default.
+- **Cost per evaluation run.** `f_rag_evaluator.py` calls Azure OpenAI once per logged request. The `EVAL_LIMIT` setting in `config.py` caps evaluation at 50 requests by default.
 
 ---
 
 ## Contributing
 
 1. Fork the repository and create a feature branch.
-2. Run the full script sequence (`a` → `d` → `f` → `g` → `h` → `i` → `e`) against your changes to confirm the pipeline works end-to-end.
+2. Run the full script sequence (`a` → `d` → `e` → `f` → `g` → `h` → `i`) against your changes to confirm the pipeline works end-to-end.
 3. If you change a path, model name, threshold, or pricing value, update `src/config.py` — do not hardcode values in individual scripts.
 4. If you add a new monitoring metric, persist it to `logs/monitoring.db` via `LLMLogger` and expose it in `dashboard.py`.
 5. Update this README if you change environment variables, generated artifacts, or the script sequence.
