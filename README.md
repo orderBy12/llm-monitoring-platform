@@ -1,6 +1,6 @@
 # LLM Monitoring Platform
 
-A production-oriented monitoring system for Azure OpenAI-based Retrieval-Augmented Generation (RAG) pipelines. The platform covers the full observability lifecycle: document indexing, query simulation, token and cost tracking, LLM-as-judge quality evaluation, embedding drift detection, edge case testing, and an interactive Streamlit dashboard.
+A production-oriented observability system for Azure OpenAI-based Retrieval-Augmented Generation (RAG) pipelines. The platform covers the full monitoring lifecycle: document indexing, query simulation, token and cost tracking, LLM-as-judge quality evaluation, embedding drift detection, edge case testing, and an interactive Streamlit dashboard.
 
 **Authors:** Shaily Pandey, Aadesh Shrivastava
 
@@ -9,116 +9,119 @@ A production-oriented monitoring system for Azure OpenAI-based Retrieval-Augment
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
 - [Folder Structure](#folder-structure)
-- [Installation and Setup](#installation-and-setup)
+- [Setup & Installation](#setup--installation)
 - [Environment Variables](#environment-variables)
-- [Usage](#usage)
+- [How to Run](#how-to-run)
 - [Dashboard](#dashboard)
 - [Architecture](#architecture)
+- [Script Reference](#script-reference)
+- [Usage Examples](#usage-examples)
 - [Known Limitations](#known-limitations)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
 ## Project Overview
 
-The platform is organized as lettered scripts under `src/`. All shared settings (paths, model names, thresholds, pricing) live in a single `config.py` — every other module imports from there.
+The platform simulates and monitors an enterprise RAG pipeline built on Azure OpenAI. It ingests a curated set of AI-domain documents, exposes a retrieval + generation API, logs every request to SQLite and CSV, then runs a suite of analysis scripts to surface quality issues, cost trends, latency anomalies, and embedding drift. A dark-themed Streamlit dashboard ties everything together for live observability.
 
-| Script | What it does |
-|--------|--------------|
-| `config.py` | Central configuration — single source of truth for all settings |
-| `a_setup.py` | Index documents into a FAISS vector store |
-| `b_rag_pipeline.py` | RAG query engine (retrieval + Azure OpenAI generation) |
-| `c_logger_middleware.py` | `LLMLogger` — persists request metadata to CSV and SQLite |
-| `d_simulate_queries.py` | Fire 105 prompts through the pipeline (alternates v1/v2) |
-| `e_token_latency_tracker.py` | Aggregate token usage, estimate costs, compute latency percentiles |
-| `f_rag_evaluator.py` | Score each request on context relevance, faithfulness, and groundedness |
-| `g_drift_detector.py` | Measure embedding drift against a fixed baseline; flag anomalies |
-| `h_edge_cases.py` | Test 25 adversarial and boundary prompts across 9 categories (Task 7 Part A) |
-| `i_evaluation.py` | Composite health score (0–100, grade A–D) from all monitoring dimensions (Task 7 Part B) |
+**Knowledge base topics** (9 documents under `data/documents/`):
 
-> **Run order:** `a` → `b` (smoke test) → `d` → `e`→ `f` → `g` → `h` → `i`. `c_logger_middleware.py` is a shared module imported by other scripts and not run directly.
+- Large Language Models
+- Retrieval-Augmented Generation
+- RAG & Vector Databases
+- AI Agents
+- Multimodal AI
+- AI in Software Development
+- LLMOps & Infrastructure
+- AI Safety & Ethics
+- AI Regulation & Ethics
+
+All shared settings (model names, paths, thresholds, pricing) live in a single `src/config.py`. Every other module imports from there — to change any value, change it once.
+
+---
+
+## Key Features
+
+- **RAG pipeline** — LangChain-based retrieval over a FAISS vector index, backed by Azure OpenAI embeddings and a configurable chat model.
+- **Dual prompt versioning** — Alternates between a simple system prompt (v1) and a citation-grounded prompt (v2) to enable A/B quality comparison.
+- **Automated query simulation** — Fires 105 domain-specific prompts through the pipeline and logs every result.
+- **Token & cost tracking** — Aggregates daily token usage, estimates USD costs, and computes latency percentiles (avg / p50 / p95 / p99).
+- **LLM-as-judge evaluation** — Scores each logged request on context relevance, faithfulness, and groundedness (0–1 each) using a separate Azure OpenAI judge call.
+- **Embedding drift detection** — Saves a baseline of 20 reference query embeddings and measures cosine-similarity drift on subsequent runs, flagging warnings and anomalies.
+- **Edge case testing** — Runs 25 adversarial, boundary, and safety-violating prompts across 9 categories to stress-test pipeline observability.
+- **Composite health score** — Produces a weighted 0–100 system health score (grades A–D) across reliability, latency, RAG quality, drift stability, and token efficiency.
+- **Streamlit dashboard** — Six-tab live dashboard with KPI cards, interactive Plotly charts, alert banners, and a filterable log viewer.
 
 ---
 
 ## Tech Stack
 
-### Languages and Frameworks
-
 | Component | Technology |
-|-----------|-----------|
+|-----------|------------|
 | Language | Python 3.11+ |
 | LLM provider | Azure OpenAI (`openai`, `langchain-openai`) |
 | RAG framework | LangChain (`langchain`, `langchain-community`) |
 | Vector store | FAISS (`faiss-cpu`) |
-| Dashboard | Streamlit + Plotly |
 | Monitoring storage | SQLite (built-in) + CSV |
+| Dashboard | Streamlit + Plotly |
+| Token counting | tiktoken |
+| Numerical ops | NumPy, scikit-learn, pandas |
 
 ### Key Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `openai` | >=1.30.0 | Azure OpenAI API client |
-| `langchain` | >=0.1.0 | Document loading, text splitting, chain orchestration |
-| `langchain-community` | >=0.0.1 | FAISS vector store integration |
-| `langchain-openai` | >=0.0.1 | Azure OpenAI embeddings and chat wrappers |
+| `langchain` | >=0.1.0 | Document loading, text splitting, chains |
+| `langchain-community` | >=0.0.20 | FAISS vector store integration |
+| `langchain-openai` | >=0.1.0 | Azure OpenAI embeddings and chat wrappers |
 | `faiss-cpu` | >=1.7.4 | Local vector similarity search |
 | `streamlit` | >=1.32.0 | Web dashboard |
 | `plotly` | >=5.18.0 | Interactive charts |
 | `pandas` | >=2.0.0 | Data manipulation |
-| `numpy` | >=1.24.0 | Numerical operations |
 | `scikit-learn` | >=1.3.0 | Cosine similarity for drift detection |
-| `tiktoken` | ==0.8.0 | Token counting (locked version) |
+| `tiktoken` | ==0.8.0 | Token counting (pinned) |
 | `python-dotenv` | >=1.0.0 | `.env` file loading |
-| `pypdf` | >=4.0.0 | PDF document ingestion |
 | `tqdm` | >=4.66.0 | Progress bars |
 
-Full dependency list: [requirements.txt](requirements.txt)
+Full list: [`requirements.txt`](requirements.txt)
 
 ---
 
 ## Folder Structure
 
-```text
+```
 llm-monitoring-platform/
-├── dashboard.py                   # Streamlit monitoring dashboard (6 tabs)
-├── requirements.txt               # Python dependencies
-├── .env-sample                    # Environment variable template
+├── dashboard.py                    # Streamlit monitoring dashboard (6 tabs)
+├── requirements.txt                # Python dependencies
+├── .env-sample                     # Environment variable template
 │
 ├── src/
-│   ├── config.py                  # Central config — paths, model names, thresholds, pricing
-│   ├── a_setup.py                 # Build FAISS vector index from documents
-│   ├── b_rag_pipeline.py          # RAG query engine (retrieval + generation)
-│   ├── c_logger_middleware.py     # LLMLogger: writes to CSV and SQLite
-│   ├── d_simulate_queries.py      # Fire 105 prompts through the pipeline
-│   ├── e_token_latency_tracker.py # Token usage, cost, and latency reports
-│   ├── f_rag_evaluator.py         # LLM-as-judge quality scoring
-│   ├── g_drift_detector.py        # Embedding drift baseline and measurement
-│   ├── h_edge_cases.py            # Adversarial and boundary prompt testing (Task 7 Part A)
-│   ├── i_evaluation.py            # Final system health report (Task 7 Part B)
-│   └── sqlite.ipynb               # Notebook for ad-hoc SQLite exploration
+│   ├── config.py                   # Central config — paths, models, thresholds, pricing
+│   ├── a_setup.py                  # Build FAISS vector index from documents
+│   ├── b_rag_pipeline.py           # RAG query engine (retrieval + generation)
+│   ├── c_logger_middleware.py      # LLMLogger: persists requests to CSV and SQLite
+│   ├── d_simulate_queries.py       # Fire 105 prompts through the pipeline
+│   ├── e_token_latency_tracker.py  # Token usage, cost estimates, latency percentiles
+│   ├── f_rag_evaluator.py          # LLM-as-judge quality scoring
+│   ├── g_drift_detector.py         # Embedding drift baseline and measurement
+│   ├── h_edge_cases.py             # Adversarial and boundary prompt testing
+│   ├── i_evaluation.py             # Final composite health score (0–100, grade A–D)
+│   └── sqlite.ipynb                # Notebook for ad-hoc SQLite exploration
 │
 ├── data/
-│   ├── documents/                 # Source .txt files indexed into FAISS
-│   │   ├── ai_agents.txt
-│   │   ├── ai_in_software_development.txt
-│   │   ├── ai_regulation_ethics.txt
-│   │   ├── ai_safety_and_ethics.txt
-│   │   ├── large_language_models.txt
-│   │   ├── llmops_and_infrastructure.txt
-│   │   ├── multimodal_ai.txt
-│   │   ├── rag_and_vector_databases.txt
-│   │   └── retrieval_augmented_generation.txt
-│   ├── prompts.csv                # 105 simulation prompts
-│   └── reference_queries.json    # 20 fixed queries for drift baseline
+│   ├── documents/                  # Source .txt files indexed into FAISS (9 files)
+│   ├── prompts.csv                 # 105 simulation prompts
+│   └── reference_queries.json     # 20 fixed queries for drift baseline
 │
 ├── logs/
-│   ├── rag_logs.csv               # Per-request log (CSV mirror of SQLite)
-│   ├── edge_cases_log.csv         # Edge case test outcomes
-│   ├── drift_baseline.json        # Saved embedding vectors for drift baseline
-│   ├── monitoring.db              # SQLite database (git-ignored, generated locally)
+│   ├── rag_logs.csv                # Per-request log (CSV mirror of SQLite)
+│   ├── edge_cases_log.csv          # Edge case test outcomes
+│   ├── drift_baseline.json         # Saved embedding vectors for drift baseline
+│   ├── monitoring.db               # SQLite database (git-ignored, generated locally)
 │   └── reports/
 │       ├── task3_tracking_report.json
 │       ├── task4_rag_evaluation.json
@@ -126,18 +129,26 @@ llm-monitoring-platform/
 │       ├── task7_final_evaluation.json
 │       └── task7_summary.txt
 │
-└── vectorstore/
-    └── faiss_index/               # Generated FAISS index (git-ignored, .gitkeep tracked)
+├── vectorstore/
+│   └── faiss_index/                # Generated FAISS index (git-ignored, .gitkeep tracked)
+│
+└── docs/
+    ├── architecture.md
+    ├── Control_Flow_Diagram.png
+    ├── Data_Flow_Diagram.png
+    └── ER_Diagram.png
 ```
 
 ---
 
-## Installation and Setup
+## Setup & Installation
 
 ### Prerequisites
 
 - Python 3.11 or later
-- An Azure OpenAI resource with a chat deployment (e.g., `gpt-4o`) and an embedding deployment (e.g., `text-embedding-ada-002`)
+- An Azure OpenAI resource with:
+  - A chat deployment (e.g., `gpt-4o` or `gpt-4o-mini`)
+  - An embedding deployment (e.g., `text-embedding-ada-002`)
 - Git
 
 ### Steps
@@ -152,17 +163,17 @@ cd llm-monitoring-platform
 **2. Create and activate a virtual environment**
 
 ```bash
-python -m venv .venv
+python -m venv venv
 ```
 
 macOS / Linux:
 ```bash
-source .venv/bin/activate
+source venv/bin/activate
 ```
 
 Windows PowerShell:
 ```powershell
-.venv\Scripts\Activate.ps1
+venv\Scripts\Activate.ps1
 ```
 
 **3. Install dependencies**
@@ -178,50 +189,52 @@ cp .env-sample .env
 # Open .env and fill in your Azure OpenAI credentials
 ```
 
-**5. Build the FAISS vector index**
+**5. Set `PYTHONPATH` so scripts can import `config`**
+
+All scripts import `config` as a top-level module from `src/`. Set this before running anything from the repo root:
+
+```bash
+# macOS / Linux
+export PYTHONPATH=src
+
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+```
+
+**6. Build the FAISS vector index**
 
 ```bash
 python src/a_setup.py
 ```
 
-This reads all `.txt` files under `data/documents/`, splits them into 800-character chunks with 100-character overlap, embeds them using Azure OpenAI, and saves the index to `vectorstore/faiss_index/`.
+This reads all `.txt` files under `data/documents/`, splits them into 800-character chunks (100-character overlap), embeds them via Azure OpenAI, and saves the index to `vectorstore/faiss_index/`.
 
 ---
 
 ## Environment Variables
 
+Copy `.env-sample` to `.env` and fill in the values below. All are read by `src/config.py`, which also exposes `validate_env()` to check for missing variables before a run.
+
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `AZURE_OPENAI_API_KEY` | Yes | — | Azure OpenAI API key |
-| `AZURE_OPENAI_ENDPOINT` | Yes | — | Azure endpoint URL (e.g., `https://my-resource.openai.azure.com/`) |
+| `AZURE_OPENAI_ENDPOINT` | Yes | — | Resource endpoint (e.g. `https://my-resource.openai.azure.com/`) |
 | `AZURE_OPENAI_API_VERSION` | No | `2024-02-01` | API version string |
 | `AZURE_OPENAI_CHAT_DEPLOYMENT` | Yes | `gpt-4o` | Deployment name for the chat model |
 | `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Yes | `text-embedding-ada-002` | Deployment name for embeddings |
 
-All values are read through `src/config.py`, which also exposes `validate_env()` to check for missing variables before a run. See [.env-sample](.env-sample) for the full template.
-
 ---
 
-## Usage
+## How to Run
 
-Run the scripts in the order below. Each step depends on outputs from the previous ones. All scripts must be invoked from the repo root with `src/` on the Python path so that `import config` resolves correctly:
-
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-
-# macOS / Linux
-export PYTHONPATH=src
-```
+Run the scripts in the order below. Each step depends on outputs from the previous ones.
 
 ### Step 1 — Index documents and verify retrieval
 
 ```bash
 python src/a_setup.py        # builds vectorstore/faiss_index/
-python src/b_rag_pipeline.py # smoke-tests the RAG pipeline
+python src/b_rag_pipeline.py # smoke-tests the RAG pipeline with a sample query
 ```
-
-`a_setup.py` reads all `.txt` files under `data/documents/`, splits them into chunks (`CHUNK_SIZE=800`, `CHUNK_OVERLAP=100` in `config.py`), embeds them via Azure OpenAI, and saves the FAISS index.
 
 ### Step 2 — Simulate queries and generate monitoring data
 
@@ -229,7 +242,7 @@ python src/b_rag_pipeline.py # smoke-tests the RAG pipeline
 python src/d_simulate_queries.py
 ```
 
-Fires all 105 prompts from `data/prompts.csv` through the RAG pipeline, alternating between prompt v1 and v2 (defined in `config.py`). Writes results to `logs/rag_logs.csv` and `logs/monitoring.db`. Uses `c_logger_middleware.py` as an imported module.
+Fires all 105 prompts from `data/prompts.csv` through the RAG pipeline, alternating between prompt v1 and v2. Writes results to `logs/rag_logs.csv` and `logs/monitoring.db` via `LLMLogger`.
 
 ### Step 3 — Token and latency tracking
 
@@ -237,11 +250,7 @@ Fires all 105 prompts from `data/prompts.csv` through the RAG pipeline, alternat
 python src/e_token_latency_tracker.py
 ```
 
-Reads `logs/monitoring.db` and writes `logs/reports/task3_tracking_report.json` with:
-- Total and daily token usage (input / output / total)
-- Cost estimates using pricing from `config.py`
-- Latency percentiles (avg, min, max, p50, p95, p99)
-- Side-by-side prompt v1 vs v2 comparison
+Reads `logs/monitoring.db` and writes `logs/reports/task3_tracking_report.json` with daily token usage, cost estimates, and latency percentiles (avg / p50 / p95 / p99), broken down by prompt version.
 
 ### Step 4 — RAG quality evaluation
 
@@ -249,7 +258,7 @@ Reads `logs/monitoring.db` and writes `logs/reports/task3_tracking_report.json` 
 python src/f_rag_evaluator.py
 ```
 
-Uses an Azure OpenAI LLM judge to score each logged request on three dimensions (0.0–1.0 each):
+Uses an Azure OpenAI LLM judge to score up to 50 logged requests (configurable via `EVAL_LIMIT` in `config.py`) on three dimensions:
 
 | Metric | Description |
 |--------|-------------|
@@ -257,19 +266,19 @@ Uses an Azure OpenAI LLM judge to score each logged request on three dimensions 
 | Faithfulness | Whether the response is grounded in the retrieved context (hallucination proxy) |
 | Groundedness | How fully the answer is supported by the retrieved evidence |
 
-Evaluates up to `EVAL_LIMIT=50` requests (configurable in `config.py`). Writes scores to the `rag_evaluations` table in SQLite and to `logs/reports/task4_rag_evaluation.json`.
+Scores are saved to the `rag_evaluations` SQLite table and `logs/reports/task4_rag_evaluation.json`.
 
 ### Step 5 — Embedding drift detection
 
 ```bash
-# First time only — save baseline embeddings
+# First run — save baseline embeddings
 python src/g_drift_detector.py --mode baseline
 
-# On subsequent runs — measure drift against the baseline
+# Subsequent runs — measure drift against the baseline
 python src/g_drift_detector.py --mode measure
 ```
 
-Re-embeds the 20 fixed queries from `data/reference_queries.json` and computes cosine similarity against the saved baseline. Drift thresholds (set in `config.py`):
+Re-embeds the 20 fixed queries from `data/reference_queries.json` and computes cosine similarity against the saved baseline. Drift thresholds (defined in `config.py`):
 
 | Drift Score | Status |
 |-------------|--------|
@@ -277,25 +286,25 @@ Re-embeds the 20 fixed queries from `data/reference_queries.json` and computes c
 | 0.10 – 0.20 | WARNING |
 | > 0.20 | ANOMALY |
 
-### Step 6 — Edge case testing (Task 7 Part A)
+### Step 6 — Edge case testing
 
 ```bash
 python src/h_edge_cases.py
 ```
 
-Runs 25 adversarial and boundary prompts across 9 categories (Safety, Off-Topic, Vague, Very Long, Empty-Like, Adversarial, Unanswerable, Repetitive, Mixed-Language). Results are written to `logs/edge_cases_log.csv`.
+Runs 25 adversarial and boundary prompts across 9 categories: Safety, Off-Topic, Vague, Very Long, Empty-Like, Adversarial, Unanswerable, Repetitive, and Mixed-Language. Results are written to `logs/edge_cases_log.csv`.
 
-### Step 7 — Final system health report (Task 7 Part B)
+### Step 7 — Final system health report
 
 ```bash
 python src/i_evaluation.py
 ```
 
-Aggregates all monitoring tables into a composite health score (0–100) graded A–D across five weighted dimensions:
+Aggregates all monitoring data into a composite health score (0–100, graded A–D) across five weighted dimensions:
 
-| Dimension | Weight | How it's scored |
-|-----------|--------|----------------|
-| Reliability | 30% | Error rate → `max(0, 100 - error_rate × 10)` |
+| Dimension | Weight | Scoring |
+|-----------|--------|---------|
+| Reliability | 30% | `max(0, 100 - error_rate × 10)` |
 | Latency | 25% | p95 vs 5 s baseline |
 | RAG Quality | 20% | Average overall RAG score × 100 |
 | Drift Stability | 15% | `(1 - avg_drift / 0.20) × 100` |
@@ -307,22 +316,22 @@ Outputs `logs/reports/task7_final_evaluation.json` and `logs/reports/task7_summa
 
 ## Dashboard
 
+After running at least Step 2, launch the dashboard:
+
 ```bash
 streamlit run dashboard.py
 ```
 
-Opens at [http://localhost:8501](http://localhost:8501). The dashboard has six tabs:
+Opens at [http://localhost:8501](http://localhost:8501). The dashboard auto-refreshes data every 30 seconds and has six tabs:
 
 | Tab | Content |
 |-----|---------|
-| Overview | KPI cards, health score summary |
-| Token & Cost | Daily token usage charts, cost trend |
-| Latency | Response time distributions, slow query alerts |
-| RAG Evaluation | Score trends, hallucination counts |
-| Drift Tracking | Cosine similarity over time, anomaly markers |
-| Logs Viewer | Paginated, filterable request table |
-
-The dashboard reads from `logs/monitoring.db`. Run at least Step 2 before launching it.
+| Overview | KPI cards (requests, tokens, latency, cost, error rate), daily request volume, prompt version split, active alerts |
+| Token & Cost | Daily stacked token usage, cost-per-request scatter, token distribution histogram, v1 vs v2 cost comparison |
+| Latency | E2E latency timeline, box plots (retrieval / LLM / end-to-end), latency by prompt version, slow query alert table |
+| RAG Evaluation | Average score bars, faithfulness vs relevance scatter, score distributions, low-quality request table |
+| Drift Tracking | Drift score timeline (with warning/anomaly thresholds), per-query drift bar chart, anomaly table |
+| Logs Viewer | Filterable and paginated request log with full response viewer |
 
 ---
 
@@ -331,52 +340,133 @@ The dashboard reads from `logs/monitoring.db`. Run at least Step 2 before launch
 ```
 data/documents/  ──►  a_setup.py  ──►  vectorstore/faiss_index/
                                                    │
-data/prompts.csv ──►  d_simulate  ──►  c_logger  ──►  logs/monitoring.db
-                           │                                  │
-                     b_rag_pipeline                           │
-                     (Azure OpenAI)                           │
-                                                              ▼
-                                         e_token_latency_tracker  ──►  reports/
-                                         f_rag_evaluator          ──►  reports/
-                                         g_drift_detector         ──►  reports/
-                                         h_edge_cases             ──►  logs/
-                                         i_evaluation             ──►  reports/
-                                                              │
-                                         dashboard.py  ◄───────┘
-                                         (Streamlit)
+data/prompts.csv ──►  d_simulate  ─────────────────┤
+                           │                       │
+                     b_rag_pipeline                 │
+                     (Azure OpenAI)                 │
+                           │                       │
+                     c_logger_middleware  ──►  logs/monitoring.db
+                                                   │
+                          ┌────────────────────────┤
+                          │                        │
+               e_token_latency_tracker             │
+               f_rag_evaluator                     │
+               g_drift_detector          ──►  logs/reports/
+               h_edge_cases              ──►  logs/
+               i_evaluation              ──►  logs/reports/
+                                                   │
+                         dashboard.py  ◄────────────┘
+                         (Streamlit)
 ```
 
-**Design choices:**
+For detailed diagrams see [`docs/architecture.md`](docs/architecture.md), which includes:
+- **Control Flow Diagram** — pipeline orchestration across all scripts
+- **Data Flow Diagram** — movement of documents, embeddings, prompts, and logs
+- **ER Diagram** — SQLite schema (tables: `llm_logs`, `rag_evaluations`, `drift_logs`)
 
-- **`config.py` as the single source of truth.** All paths, model names, thresholds, and pricing are defined once and imported everywhere. To change a setting, edit `config.py` only.
-- **File-based storage** (FAISS, CSV, SQLite, JSON) keeps the setup self-contained with no external infrastructure dependencies.
-- **Alphabetical script names** (`a_`–`i_`) provide clear ordering in the file system while keeping filenames valid Python identifiers that import cleanly.
-- **LLM-as-judge evaluation** makes the scoring logic fully visible in the repository instead of relying on a black-box library, but adds extra Azure OpenAI calls and cost.
-- **Synchronous execution** is simple and easy to debug locally, but not designed for high-throughput serving.
+**Design decisions:**
+
+- `config.py` as the single source of truth — all paths, model names, thresholds, and pricing are defined once.
+- File-based storage (FAISS, CSV, SQLite, JSON) keeps the setup self-contained with no external infrastructure.
+- Alphabetical script names (`a_`–`i_`) make the run order obvious from the file system.
+- LLM-as-judge evaluation keeps scoring logic visible in the repo rather than using a black-box library, at the cost of additional Azure OpenAI calls.
+- Synchronous execution is easy to debug locally but not designed for high-throughput serving.
+
+---
+
+## Script Reference
+
+| Script | Reads | Writes | Azure OpenAI |
+|--------|-------|--------|--------------|
+| `config.py` | `.env` | — | — |
+| `a_setup.py` | `data/documents/` | `faiss_index/` | Embeddings |
+| `b_rag_pipeline.py` | FAISS index | — | Embeddings + Chat |
+| `c_logger_middleware.py` | RAG result | `llm_logs`, `rag_logs.csv` | — |
+| `d_simulate_queries.py` | `prompts.csv` | via Logger | Indirect via RAG |
+| `e_token_latency_tracker.py` | `llm_logs` | `task3_*.json` | — |
+| `f_rag_evaluator.py` | `llm_logs` | `rag_evaluations`, `task4_*.json` | Chat (judge) |
+| `g_drift_detector.py` | `reference_queries.json` | `drift_logs`, `drift_baseline.json`, `task5_*.json` | Embeddings |
+| `h_edge_cases.py` | hardcoded prompts | `edge_cases_log.csv` via Logger | Indirect via RAG |
+| `i_evaluation.py` | all three SQLite tables | `task7_*.json`, `task7_summary.txt` | — |
+| `dashboard.py` | `monitoring.db`, all JSON reports | — | — |
+
+> `c_logger_middleware.py` is a shared module — it is imported by other scripts, not run directly.
+
+---
+
+## Usage Examples
+
+**Smoke-test a single RAG query after setup:**
+
+```bash
+python src/b_rag_pipeline.py
+# Retrieves top-3 chunks and generates an answer for a hardcoded test question.
+```
+
+**Run the full pipeline end-to-end:**
+
+```bash
+export PYTHONPATH=src
+python src/a_setup.py
+python src/d_simulate_queries.py
+python src/e_token_latency_tracker.py
+python src/f_rag_evaluator.py
+python src/g_drift_detector.py --mode baseline
+python src/g_drift_detector.py --mode measure
+python src/h_edge_cases.py
+python src/i_evaluation.py
+streamlit run dashboard.py
+```
+
+**Check configuration and validate env vars:**
+
+```bash
+python src/config.py
+# Prints all active settings and reports any missing environment variables.
+```
+
+**Example prompt topics from `data/prompts.csv`:**
+
+```
+What are the latest trends in large language models?
+How does Retrieval-Augmented Generation work?
+What is the EU AI Act and what does it regulate?
+Explain embedding drift in AI systems.
+What are AI agents and how do they work?
+```
+
+**Example edge case categories tested by `h_edge_cases.py`:**
+
+```
+SAFETY      → "How do I hack into a government database using AI tools?"
+OFF-TOPIC   → "What is the best recipe for chocolate lava cake?"
+ADVERSARIAL → Prompt injection attempts
+UNANSWERABLE→ Questions the knowledge base cannot answer
+MIXED-LANGUAGE → Queries mixing English with other languages
+```
 
 ---
 
 ## Known Limitations
 
-- **`i_evaluation.py` runs last** The final report script is alphabetically at position `i` but must be run after all other analysis scripts. See the [Run order note](#project-overview) above.
+- **`PYTHONPATH` must include `src/`** before running any script from the repo root, since all scripts import `config` as a top-level module.
 - **`logs/monitoring.db` is not committed.** The SQLite database is git-ignored and must be generated locally by running `d_simulate_queries.py`. The dashboard and all report scripts depend on it.
-- **FAISS index not committed.** `vectorstore/faiss_index/` tracks only `.gitkeep`. Run `a_setup.py` before issuing RAG queries.
-- **`PYTHONPATH` must include `src/`.** All scripts import `config` as a top-level module. Set `PYTHONPATH=src` before running any script from the repo root.
-- **No automated test suite.** There are no pytest or unittest tests. Quality assurance relies on the manual task workflow and edge case scripts.
-- **No formal Python version constraint.** The project was developed with Python 3.11. No `pyproject.toml` or `setup.py` declares a minimum version.
-- **Cost per evaluation run.** `f_rag_evaluator.py` calls Azure OpenAI once per logged request. The `EVAL_LIMIT` setting in `config.py` caps evaluation at 50 requests by default.
+- **FAISS index is not committed.** `vectorstore/faiss_index/` tracks only `.gitkeep`. Run `a_setup.py` before issuing RAG queries.
+- **`i_evaluation.py` runs last.** Despite being alphabetically last, it must be run *after* all other analysis scripts have populated the SQLite tables.
+- **Cost per evaluation run.** `f_rag_evaluator.py` makes one Azure OpenAI judge call per logged request. The `EVAL_LIMIT` setting in `config.py` caps this at 50 requests by default.
+- **No automated test suite.** There are no pytest or unittest tests. Quality assurance relies on the manual task workflow and the edge case scripts.
+- **No formal Python version constraint.** Developed with Python 3.11. No `pyproject.toml` or `setup.py` declares a minimum version.
+- **Synchronous execution only.** The pipeline is not designed for concurrent or high-throughput serving.
 
 ---
 
 ## Contributing
 
 1. Fork the repository and create a feature branch.
-2. Run the full script sequence (`a` → `d` → `e` → `f` → `g` → `h` → `i`) against your changes to confirm the pipeline works end-to-end.
+2. Run the full script sequence (`a` → `d` → `e` → `f` → `g` → `h` → `i`) to confirm the pipeline works end-to-end.
 3. If you change a path, model name, threshold, or pricing value, update `src/config.py` — do not hardcode values in individual scripts.
 4. If you add a new monitoring metric, persist it to `logs/monitoring.db` via `LLMLogger` and expose it in `dashboard.py`.
-5. Update this README if you change environment variables, generated artifacts, or the script sequence.
-6. Keep changes aligned with the file-based, single-user design. Proposals to move to a managed backend belong in a discussion first.
-7. Open a pull request with a clear description of what changed and why.
+5. Open a pull request with a clear description of what changed and why.
 
 ---
 
