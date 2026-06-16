@@ -322,7 +322,7 @@ def measure_drift():
     print(f"  Threshold Anomaly : > {config.DRIFT_ANOMALY_THRESHOLD }")
 
     if anomalies:
-        print(f"\n  ANOMALY QUERIES:")
+        print(f"\n ANOMALY QUERIES:")
         for a in anomalies:
             print(f"     drift={a['drift_score']:.4f}  {a['query'][:50]}")
 
